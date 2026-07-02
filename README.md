@@ -12,8 +12,10 @@ cd ai-phone-agent
 npm install
 npm start
 Open http://localhost:5000
+```
 
-✨ Features
+## ✨ Features
+
 🗣️ Natural language commands
 
 🌐 Open any website
