@@ -50,275 +50,200 @@ app.post('/api/auth/login', async (req, res) => {
   } catch (e) { res.status(500).json({ error: 'Login failed' }); }
 });
 
-// ============ SMART AI BRAIN ============
+// ============ SITE MAP ============
+const WEBSITES = {
+  'youtube': 'https://youtube.com',
+  'facebook': 'https://facebook.com',
+  'fb': 'https://facebook.com',
+  'twitter': 'https://twitter.com',
+  'x': 'https://twitter.com',
+  'instagram': 'https://instagram.com',
+  'ig': 'https://instagram.com',
+  'amazon': 'https://amazon.com',
+  'github': 'https://github.com',
+  'gmail': 'https://mail.google.com',
+  'mail': 'https://mail.google.com',
+  'email': 'https://mail.google.com',
+  'netflix': 'https://netflix.com',
+  'spotify': 'https://open.spotify.com',
+  'music': 'https://open.spotify.com',
+  'reddit': 'https://reddit.com',
+  'linkedin': 'https://linkedin.com',
+  'whatsapp': 'https://web.whatsapp.com',
+  'maps': 'https://maps.google.com',
+  'drive': 'https://drive.google.com',
+  'photos': 'https://photos.google.com',
+  'calendar': 'https://calendar.google.com',
+  'chatgpt': 'https://chat.openai.com',
+  'wikipedia': 'https://wikipedia.org',
+  'wiki': 'https://wikipedia.org',
+  'twitch': 'https://twitch.tv',
+  'discord': 'https://discord.com',
+  'pinterest': 'https://pinterest.com',
+  'ebay': 'https://ebay.com',
+  'stackoverflow': 'https://stackoverflow.com',
+  'google': 'https://google.com'
+};
+
+const APPS = {
+  'calculator': { cmd: 'gnome-calculator', name: 'Calculator' },
+  'calc': { cmd: 'gnome-calculator', name: 'Calculator' },
+  'notepad': { cmd: 'gedit', name: 'Text Editor' },
+  'notes': { cmd: 'gedit', name: 'Text Editor' },
+  'editor': { cmd: 'gedit', name: 'Text Editor' },
+  'terminal': { cmd: 'gnome-terminal', name: 'Terminal' },
+  'console': { cmd: 'gnome-terminal', name: 'Terminal' },
+  'cmd': { cmd: 'gnome-terminal', name: 'Terminal' },
+  'files': { cmd: 'nautilus', name: 'File Manager' },
+  'explorer': { cmd: 'nautilus', name: 'File Manager' },
+  'folders': { cmd: 'nautilus', name: 'File Manager' },
+  'settings': { cmd: 'gnome-control-center', name: 'Settings' },
+  'preferences': { cmd: 'gnome-control-center', name: 'Settings' },
+  'browser': { cmd: 'firefox', name: 'Firefox' },
+  'firefox': { cmd: 'firefox', name: 'Firefox' },
+  'chrome': { cmd: 'google-chrome', name: 'Chrome' },
+  'vscode': { cmd: 'code', name: 'VS Code' },
+  'code': { cmd: 'code', name: 'VS Code' }
+};
+
+// ============ PROCESS MESSAGE ============
 function processMessage(msg) {
   const m = msg.toLowerCase().trim();
   
-  // COMMAND PATTERNS - These trigger device actions
-  const commands = [
-    // Open websites
-    { pattern: /^(open|go to|visit|launch|start|show me)\s+(.+)/i, handler: (match) => {
-      const target = match[2].toLowerCase();
-      const sites = {
-        'youtube': 'https://youtube.com', 'facebook': 'https://facebook.com',
-        'twitter': 'https://twitter.com', 'instagram': 'https://instagram.com',
-        'amazon': 'https://amazon.com', 'github': 'https://github.com',
-        'gmail': 'https://mail.google.com', 'netflix': 'https://netflix.com',
-        'spotify': 'https://open.spotify.com', 'reddit': 'https://reddit.com',
-        'linkedin': 'https://linkedin.com', 'whatsapp': 'https://web.whatsapp.com',
-        'maps': 'https://maps.google.com', 'drive': 'https://drive.google.com',
-        'photos': 'https://photos.google.com', 'calendar': 'https://calendar.google.com',
-        'chatgpt': 'https://chat.openai.com', 'claude': 'https://claude.ai',
-        'stackoverflow': 'https://stackoverflow.com', 'wikipedia': 'https://wikipedia.org',
-        'twitch': 'https://twitch.tv', 'discord': 'https://discord.com',
-        'pinterest': 'https://pinterest.com', 'ebay': 'https://ebay.com'
-      };
-      for (const [name, url] of Object.entries(sites)) {
-        if (target.includes(name)) return { type: 'command', action: 'open', value: url, message: `Opening ${name}` };
+  // Check for website keywords anywhere in the message
+  for (const [key, url] of Object.entries(WEBSITES)) {
+    if (m.includes(key)) {
+      // If it also has a search-like pattern
+      if (m.startsWith('search') || m.startsWith('find') || m.startsWith('google')) {
+        const query = m.replace(/^(search|find|google)\s+(for\s+)?/i, '').replace(key, '').trim();
+        if (query) return { type: 'command', action: 'search', value: `${query} ${key}`, message: `Searching for "${query}" on ${key}` };
       }
-      if (target.match(/\.(com|org|net|io|dev|app|co|in|ai)/)) {
-        const url = target.startsWith('http') ? target : `https://${target}`;
-        return { type: 'command', action: 'open', value: url, message: `Opening ${target}` };
-      }
-      return { type: 'command', action: 'search', value: target, message: `Searching for "${target}"` };
-    }},
-    
-    // Search
-    { pattern: /^(search|find|google|look up|look for)\s+(?:for\s+)?(.+)/i, handler: (match) => {
-      return { type: 'command', action: 'search', value: match[2], message: `Searching for "${match[2]}"` };
-    }},
-    
-    // YouTube
-    { pattern: /^(play|watch)\s+(.+?)(?:\s+on\s+youtube)?$/i, handler: (match) => {
-      return { type: 'command', action: 'open', value: `https://youtube.com/results?search_query=${encodeURIComponent(match[2])}`, message: `Playing "${match[2]}" on YouTube` };
-    }},
-    { pattern: /youtube/i, handler: () => {
-      return { type: 'command', action: 'open', value: 'https://youtube.com', message: 'Opening YouTube' };
-    }},
-    
-    // Apps
-    { pattern: /(?:open|start|launch)\s+(calculator|calc|notepad|editor|terminal|console|files|explorer|settings|preferences)/i, handler: (match) => {
-      const apps = {
-        'calculator': { cmd: 'gnome-calculator', name: 'Calculator' },
-        'calc': { cmd: 'gnome-calculator', name: 'Calculator' },
-        'notepad': { cmd: 'gedit', name: 'Text Editor' },
-        'editor': { cmd: 'gedit', name: 'Text Editor' },
-        'terminal': { cmd: 'gnome-terminal', name: 'Terminal' },
-        'console': { cmd: 'gnome-terminal', name: 'Terminal' },
-        'files': { cmd: 'nautilus', name: 'File Manager' },
-        'explorer': { cmd: 'nautilus', name: 'File Manager' },
-        'settings': { cmd: 'gnome-control-center', name: 'Settings' },
-        'preferences': { cmd: 'gnome-control-center', name: 'Settings' }
-      };
-      const app = apps[match[1].toLowerCase()];
-      if (app) return { type: 'command', action: 'app', value: app.cmd, message: `Opening ${app.name}` };
-      return null;
-    }},
-    
-    // Weather
-    { pattern: /weather(?:\s+(?:in|for|at))?\s+(.+)/i, handler: (match) => {
-      return { type: 'command', action: 'search', value: `weather ${match[1]}`, message: `Checking weather for ${match[1]}` };
-    }},
-    { pattern: /(?:what's|what is|hows|how is)\s+the\s+weather/i, handler: () => {
-      return { type: 'command', action: 'search', value: 'weather today', message: 'Checking weather' };
-    }},
-    
-    // Time/Date
-    { pattern: /(?:what\s+(?:is\s+)?(?:the\s+)?)?(time|date|day)(?:\s+is\s+it)?\??$/i, handler: () => {
-      const now = new Date();
-      return { type: 'chat', message: `It's ${now.toLocaleTimeString()} on ${now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}` };
-    }},
-    
-    // System info
-    { pattern: /(?:system|computer|device|machine)\s+(?:info|information|specs|details)/i, handler: () => {
-      const info = `OS: ${process.platform}, Architecture: ${process.arch}, Node: ${process.version}, Memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(1)}MB used`;
-      return { type: 'chat', message: info };
-    }},
-    
-    // Shutdown/Restart commands
-    { pattern: /^(shutdown|restart|reboot|log off|lock)\s*(?:the\s+)?(?:computer|pc|system|device)?$/i, handler: (match) => {
-      const actions = {
-        'shutdown': { cmd: 'shutdown now', msg: 'Shutting down...' },
-        'restart': { cmd: 'reboot', msg: 'Restarting...' },
-        'reboot': { cmd: 'reboot', msg: 'Rebooting...' },
-        'log off': { cmd: 'gnome-session-quit --no-prompt', msg: 'Logging off...' },
-        'lock': { cmd: 'gnome-screensaver-command -l', msg: 'Locking screen...' }
-      };
-      const action = actions[match[1].toLowerCase()];
-      if (action) return { type: 'command', action: 'system', value: action.cmd, message: action.msg };
-      return null;
-    }},
-  ];
-  
-  // Check commands first
-  for (const cmd of commands) {
-    const match = m.match(cmd.pattern);
-    if (match) {
-      const result = cmd.handler(match);
-      if (result) return result;
+      return { type: 'command', action: 'open', value: url, message: `Opening ${key}` };
     }
   }
   
-  // If not a command, it's a conversation
+  // Open command
+  if (m.startsWith('open ') || m.startsWith('go to ') || m.startsWith('visit ') || m.startsWith('launch ') || m.startsWith('start ')) {
+    const target = m.replace(/^(open|go to|visit|launch|start)\s+/i, '');
+    
+    // Check if it's an app
+    for (const [key, app] of Object.entries(APPS)) {
+      if (target.includes(key)) return { type: 'command', action: 'app', value: app.cmd, message: `Opening ${app.name}` };
+    }
+    
+    // Check if it's a URL
+    if (target.match(/\.(com|org|net|io|dev|app|co|in|ai)/)) {
+      const url = target.startsWith('http') ? target : `https://${target}`;
+      return { type: 'command', action: 'open', value: url, message: `Opening ${target}` };
+    }
+    
+    // Default search
+    return { type: 'command', action: 'search', value: target, message: `Searching for "${target}"` };
+  }
+  
+  // Search command
+  if (m.startsWith('search ') || m.startsWith('find ') || m.startsWith('google ') || m.startsWith('look up ')) {
+    const query = m.replace(/^(search|find|google|look up)\s+(for\s+)?/i, '');
+    return { type: 'command', action: 'search', value: query, message: `Searching for "${query}"` };
+  }
+  
+  // YouTube specific
+  if (m.startsWith('play ') || m.startsWith('watch ')) {
+    const query = m.replace(/^(play|watch)\s+/i, '').replace(/\s+on\s+youtube/i, '');
+    return { type: 'command', action: 'open', value: `https://youtube.com/results?search_query=${encodeURIComponent(query)}`, message: `Playing "${query}" on YouTube` };
+  }
+  
+  // App commands
+  for (const [key, app] of Object.entries(APPS)) {
+    if (m.includes(key)) return { type: 'command', action: 'app', value: app.cmd, message: `Opening ${app.name}` };
+  }
+  
+  // Weather
+  if (m.includes('weather')) {
+    const location = m.replace(/weather|what'?s?\s+the\s+weather|how'?s?\s+the\s+weather|check\s+weather|show\s+weather/gi, '').replace(/\s+(in|for|at)\s+/gi, '').trim();
+    const searchTerm = location ? `weather ${location}` : 'weather today';
+    return { type: 'command', action: 'search', value: searchTerm, message: location ? `Checking weather for ${location}` : 'Checking weather' };
+  }
+  
+  // Time
+  if (m.includes('time') || m.includes('clock') || m.includes('date')) {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    return { type: 'chat', message: `It's ${timeStr} on ${dateStr}` };
+  }
+  
+  // System info
+  if (m.includes('system info') || m.includes('computer info') || m.includes('device info')) {
+    const info = `OS: ${process.platform}, Arch: ${process.arch}, Node: ${process.version}, Memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(1)}MB`;
+    return { type: 'chat', message: info };
+  }
+  
+  // If no command matched, it's a conversation
   return { type: 'chat', message: getChatResponse(m) };
 }
 
-// ============ CHAT RESPONSES ============
+// ============ CHAT ============
 function getChatResponse(m) {
-  // Greetings
-  if (/^(hi+|hello+|hey+|yo+|sup+|greetings+|howdy)[!.]*$/.test(m)) {
-    const g = ["Hey! How can I help you today?", "Hello! What can I do for you?", "Hi there! Ready to assist.", "Hey! Good to see you. What do you need?"];
-    return g[Math.floor(Math.random() * g.length)];
+  if (/^(hi+|hello+|hey+|yo+|sup+|greetings+|howdy)[!.]*$/i.test(m)) {
+    return ["Hey! How can I help you?", "Hello! What can I do for you?", "Hi there! Ready to assist.", "Hey! What do you need?"][Math.floor(Math.random() * 4)];
   }
-  
-  // How are you
-  if (/how\s+(are|r)\s+(you|u)/i.test(m)) {
-    return "I'm running perfectly! All systems operational. How are you doing?";
-  }
-  
-  // Identity
-  if (/who\s+(are|r)\s+(you|u)|what\s+(is\s+)?your\s+name|about\s+(yourself|you)/i.test(m)) {
-    return "I'm your AI Assistant. I can open websites, search the internet, launch applications, check weather, tell time, control system settings, and chat with you. Just tell me what you need!";
-  }
-  
-  // Capabilities
-  if (/what\s+(can|do)\s+you\s+do|help|commands|capabilities|features|functions/i.test(m)) {
-    return "Here's what I can do:\n\n🌐 Open websites - Say \"Open YouTube\"\n🔍 Search - Say \"Search for cats\"\n📱 Launch apps - Say \"Open calculator\"\n🌤️ Weather - Say \"Weather in Paris\"\n⏰ Time - Say \"What time is it?\"\n💻 System - Say \"System info\"\n💬 Chat - Just talk to me!\n\nWhat would you like to do?";
-  }
-  
-  // Thanks
-  if (/thank(s| you)|thx|thanks|appreciate/i.test(m)) {
-    const t = ["You're welcome! 😊", "Happy to help!", "No problem at all!", "Anytime! That's what I'm here for."];
-    return t[Math.floor(Math.random() * t.length)];
-  }
-  
-  // Goodbye
-  if (/^(bye|goodbye|see\s*(you|ya|u)|cya|later|peace)[!.]*$/i.test(m)) {
-    return "Goodbye! Have a great day. I'll be here when you need me.";
-  }
-  
-  // Time-based greetings
-  if (/good\s+(morning|afternoon|evening|night)/i.test(m)) {
-    const t = m.match(/good\s+(morning|afternoon|evening|night)/i)[1];
-    return `Good ${t}! How can I assist you?`;
-  }
-  
-  // Jokes
-  if (/joke|funny|make\s+me\s+laugh|lol|haha/i.test(m)) {
-    const jokes = [
-      "Why don't scientists trust atoms? Because they make up everything! 😄",
-      "Why did the developer go broke? Because he used up all his cache! 💻",
-      "What's a computer's favorite beat? An algo-rhythm! 🎵",
-      "Why do programmers prefer dark mode? Because light attracts bugs! 🐛",
-      "How many programmers does it take to change a light bulb? None, that's a hardware problem! 💡"
-    ];
+  if (/how\s+(are|r)\s+(you|u)/i.test(m)) return "I'm running perfectly! All systems operational. How are you?";
+  if (/who\s+(are|r)\s+(you|u)|your\s+name/i.test(m)) return "I'm your AI Assistant. I can open websites, search, launch apps, check weather, tell time, and chat!";
+  if (/what\s+(can|do)\s+you\s+do|help|commands/i.test(m)) return "I can:\n• Open websites (\"Open YouTube\")\n• Search (\"Search for cats\")\n• Launch apps (\"Open calculator\")\n• Weather (\"Weather in Paris\")\n• Time (\"What time is it?\")\n• Chat with you!";
+  if (/thank/i.test(m)) return "You're welcome! 😊";
+  if (/^(bye|goodbye|see\s*(you|ya)|cya|later)[!.]*$/i.test(m)) return "Goodbye! Have a great day!";
+  if (/good\s+(morning|afternoon|evening|night)/i.test(m)) return `Good ${m.match(/good\s+(morning|afternoon|evening|night)/i)[1]}! How can I help?`;
+  if (/joke|funny|laugh/i.test(m)) {
+    const jokes = ["Why don't scientists trust atoms? They make up everything! 😄", "Why did the dev go broke? He used up all his cache! 💻", "What's a computer's favorite beat? An algo-rhythm! 🎵"];
     return jokes[Math.floor(Math.random() * jokes.length)];
   }
+  if (/love\s+you|ily/i.test(m)) return "Thank you! ❤️";
+  if (/(i'?m\s+)?(sad|upset|depressed|lonely|bored)/i.test(m)) return "I understand. Want to talk or shall I help distract you?";
   
-  // How old
-  if (/how\s+old|your\s+age/i.test(m)) return "I was born when you started me up! Every restart is a rebirth. 😄";
-  
-  // Creator
-  if (/who\s+(made|created|built|developed)\s+you/i.test(m)) return "I was created by a developer who wanted to make device control easier and more intuitive!";
-  
-  // Love
-  if (/love\s+you|ily|i\s+love\s+you/i.test(m)) return "Thank you! I'm here to make your life easier. ❤️";
-  
-  // Feelings
-  if (/(i('?m| am)\s+)?(sad|upset|depressed|unhappy|lonely|bored|tired)/i.test(m)) {
-    return "I understand. Sometimes we all have those days. Want to talk about it, or would you like me to help distract you? I can play music, show you something funny, or just listen.";
-  }
-  
-  // Name
-  if (/what('?s| is)\s+my\s+name/i.test(m)) return "I don't know your name yet, but I'd love to learn more about you!";
-  
-  // Meaning of life
-  if (/meaning\s+of\s+life/i.test(m)) return "42. Just kidding! The meaning of life is what you make of it. For me, it's helping you!";
-  
-  // Yes/No responses
-  if (/^(yes|yeah|yep|yup|sure|ok|okay|alright|fine)[!.]*$/i.test(m)) return "Great! What would you like to do?";
-  if (/^(no|nope|nah|not really)[!.]*$/i.test(m)) return "Okay, no problem. Let me know if you need anything!";
-  
-  // Default conversational responses
-  const defaults = [
-    "Interesting! Tell me more about that.",
-    "I see. How can I help you with that?",
-    "That's fascinating! What else is on your mind?",
-    "I'm here to help. What would you like to do?",
-    "Got it. Is there something specific you need?",
-    "I understand. Let me know if you need anything!",
-    "Cool! Would you like me to search for more information?",
-    "Noted! Feel free to ask me anything."
-  ];
-  return defaults[Math.floor(Math.random() * defaults.length)];
+  return ["Interesting! How can I help with that?", "I see. What would you like to do?", "Got it. Need anything specific?", "Cool! Let me know what you need."][Math.floor(Math.random() * 4)];
 }
 
-// ============ EXECUTE COMMAND ============
+// ============ EXECUTE ============
 function executeAction(action, value) {
   return new Promise((resolve) => {
-    if (!action) return resolve('Done');
+    if (!action) return resolve('');
     let cmd = '';
-    
     if (action === 'open') {
-      cmd = process.platform === 'win32' ? `start "" "${value}"` :
-            process.platform === 'darwin' ? `open "${value}"` : 
-            `xdg-open "${value}"`;
+      cmd = process.platform === 'win32' ? `start "" "${value}"` : process.platform === 'darwin' ? `open "${value}"` : `xdg-open "${value}"`;
     } else if (action === 'search') {
       const url = `https://www.google.com/search?q=${encodeURIComponent(value)}`;
       cmd = process.platform === 'win32' ? `start "" "${url}"` : `xdg-open "${url}"`;
     } else if (action === 'app') {
       cmd = value;
-    } else if (action === 'system') {
-      cmd = value;
     }
-    
-    exec(cmd, { timeout: 10000 }, (err, stdout, stderr) => {
-      resolve(err ? `Error: ${stderr || err.message}` : (stdout || 'Completed'));
+    exec(cmd, { timeout: 10000 }, (err, stdout) => {
+      resolve(err ? `Error: ${err.message}` : 'Done');
     });
   });
 }
 
-// ============ MAIN AGENT ENDPOINT ============
+// ============ AGENT ENDPOINT ============
 app.post('/api/agent', auth, async (req, res) => {
   try {
     const { message } = req.body;
     if (!message || !message.trim()) return res.status(400).json({ error: 'Message required' });
     
-    console.log(`\n📩 Input: "${message}"`);
-    
-    // Process the message
+    console.log(`\n📩 "${message}"`);
     const result = processMessage(message);
-    console.log(`🤖 Type: ${result.type}, Response: ${result.message}`);
+    console.log(`🤖 Type: ${result.type}, Message: ${result.message}`);
     
     let execResult = '';
-    
-    // Execute if it's a command
     if (result.type === 'command' && result.action) {
       execResult = await executeAction(result.action, result.value);
-      console.log(`✅ Execution: ${execResult}`);
+      console.log(`✅ ${execResult}`);
     }
     
-    // Save to history
     const history = readJSON('history.json');
-    history.push({
-      userId: req.userId,
-      input: message,
-      type: result.type,
-      response: result.message,
-      action: result.action || null,
-      value: result.value || null,
-      result: execResult || null,
-      timestamp: new Date().toISOString()
-    });
+    history.push({ userId: req.userId, input: message, type: result.type, response: result.message, action: result.action || null, value: result.value || null, result: execResult || null, timestamp: new Date().toISOString() });
     writeJSON('history.json', history);
     
-    res.json({
-      success: true,
-      type: result.type,
-      message: result.message,
-      result: execResult || undefined
-    });
-    
+    res.json({ success: true, type: result.type, message: result.message, result: execResult || '' });
   } catch (e) {
     console.error('Error:', e);
     res.status(500).json({ error: 'Processing failed' });
@@ -326,18 +251,9 @@ app.post('/api/agent', auth, async (req, res) => {
 });
 
 app.get('/api/history', auth, (req, res) => {
-  const history = readJSON('history.json')
-    .filter(h => h.userId === req.userId)
-    .slice(-100)
-    .reverse();
-  res.json({ history });
+  res.json({ history: readJSON('history.json').filter(h => h.userId === req.userId).slice(-100).reverse() });
 });
 
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
-app.listen(PORT, () => {
-  console.log(`\n╔══════════════════════════════╗`);
-  console.log(`║   🤖 AI Agent Ready         ║`);
-  console.log(`║   http://localhost:${PORT}      ║`);
-  console.log(`╚══════════════════════════════╝\n`);
-});
+app.listen(PORT, () => console.log(`\n⚡ AI Agent running at http://localhost:${PORT}\n`));
