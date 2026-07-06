@@ -5,71 +5,68 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Agent</title>
     <style>
-        :root { --bg:#0c0c0f; --surface:#16161d; --surface2:#1c1c24; --border:#2a2a35; --text:#e8e8ed; --text2:#8888a0; --accent:#6c5ce7; --accent2:#a29bfe; --success:#00b894; --danger:#d63031; }
+        :root{--bg:#0a0a0f;--surface:#13131a;--border:#1e1e2a;--text:#e4e4e7;--text2:#888;--accent:#6366f1;--success:#10b981;--danger:#ef4444}
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
         .hidden{display:none!important}
         ::-webkit-scrollbar{width:5px}
         ::-webkit-scrollbar-track{background:transparent}
         ::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px}
-        
         .screen{height:100vh;display:flex;align-items:center;justify-content:center}
-        .auth-card{background:var(--surface);padding:40px;border-radius:20px;width:400px;border:1px solid var(--border)}
+        .auth-card{background:var(--surface);padding:40px;border-radius:16px;width:400px;border:1px solid var(--border)}
         .auth-card .logo{font-size:50px;text-align:center;margin-bottom:15px}
-        .auth-card h2{text-align:center;margin-bottom:5px}
+        .auth-card h2{text-align:center;margin-bottom:5px;font-size:22px}
         .auth-card .sub{text-align:center;color:var(--text2);font-size:13px;margin-bottom:30px}
         .field{margin-bottom:15px}
-        .field label{display:block;font-size:11px;color:var(--text2);text-transform:uppercase;margin-bottom:5px;font-weight:600}
-        .field input{width:100%;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px}
-        .field input:focus{outline:none;border-color:var(--accent)}
-        .btn{width:100%;padding:12px;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;background:var(--accent);color:white}
+        .field label{display:block;font-size:11px;color:var(--text2);text-transform:uppercase;margin-bottom:5px;font-weight:600;letter-spacing:0.5px}
+        .field input{width:100%;padding:13px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none}
+        .field input:focus{border-color:var(--accent)}
+        .btn{width:100%;padding:13px;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;background:var(--accent);color:white;margin-top:5px}
         .btn:hover{opacity:0.9}
         .auth-link{text-align:center;margin-top:20px;font-size:13px;color:var(--text2)}
-        .auth-link a{color:var(--accent2);cursor:pointer}
-        
+        .auth-link a{color:var(--accent);cursor:pointer}
         #appScreen{height:100vh;display:flex;flex-direction:column}
-        header{padding:15px 20px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+        header{padding:14px 20px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
         .brand{display:flex;align-items:center;gap:10px}
-        .brand .avatar{font-size:25px}
-        .brand h3{font-size:14px}
-        .brand .dot{color:var(--success);font-size:10px}
-        header button{padding:8px 16px;background:transparent;border:1px solid var(--border);color:var(--text);border-radius:8px;cursor:pointer}
-        
+        .brand .avatar{font-size:26px}
+        .brand h3{font-size:14px;font-weight:600}
+        .brand .dot{color:var(--success);font-size:11px}
+        header button{padding:8px 16px;background:transparent;border:1px solid var(--border);color:var(--text);border-radius:8px;cursor:pointer;font-size:13px}
+        header button:hover{background:var(--border)}
         main{flex:1;overflow-y:auto;padding:20px}
         .welcome{text-align:center;margin-top:50px}
         .welcome .w-icon{font-size:60px;margin-bottom:15px}
-        .welcome h2{margin-bottom:5px}
-        .welcome p{color:var(--text2);margin-bottom:20px}
-        .quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:500px;margin:0 auto}
-        .q-card{padding:15px;background:var(--surface);border:1px solid var(--border);border-radius:12px;cursor:pointer;text-align:left;font-size:14px;transition:all 0.2s}
-        .q-card:hover{border-color:var(--accent)}
-        
-        .msg{display:flex;margin-bottom:15px;animation:fadeIn 0.3s}
-        @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        .welcome h2{font-size:22px;margin-bottom:5px}
+        .welcome p{color:var(--text2);font-size:14px;margin-bottom:20px}
+        .quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:480px;margin:0 auto}
+        .q-card{padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;cursor:pointer;font-size:14px;transition:all 0.2s}
+        .q-card:hover{border-color:var(--accent);background:#1a1a24}
+        .msg{display:flex;margin-bottom:16px;animation:fadeIn 0.3s}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
         .msg.user{justify-content:flex-end}
-        .bubble{max-width:75%;padding:12px 16px;border-radius:15px;font-size:14px;line-height:1.5}
+        .bubble{max-width:75%;padding:12px 16px;border-radius:16px;font-size:14px;line-height:1.5;white-space:pre-wrap}
         .user .bubble{background:var(--accent);border-bottom-right-radius:4px}
         .agent .bubble{background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:4px}
-        .tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;margin-bottom:5px}
-        .tag.command{background:rgba(108,92,231,0.2);color:var(--accent2)}
-        .tag.chat{background:rgba(0,184,148,0.2);color:var(--success)}
+        .tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;margin-bottom:6px;letter-spacing:0.5px}
+        .tag.command{background:rgba(99,102,241,0.15);color:#a5b4fc}
+        .tag.chat{background:rgba(16,185,129,0.15);color:#6ee7b7}
         .result-text{display:block;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:12px;color:var(--success)}
-        
-        .typing-dots{display:flex;gap:4px;padding:5px 0}
+        .typing-dots{display:flex;gap:4px;padding:4px 0}
         .typing-dots span{width:6px;height:6px;background:var(--text2);border-radius:50%;animation:bounce 1.4s infinite}
         .typing-dots span:nth-child(2){animation-delay:0.2s}
         .typing-dots span:nth-child(3){animation-delay:0.4s}
         @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
-        
-        footer{padding:15px 20px;background:var(--surface);border-top:1px solid var(--border);display:flex;gap:10px;align-items:center}
-        #cmdInput{flex:1;padding:12px 18px;background:var(--bg);border:1px solid var(--border);border-radius:25px;color:var(--text);font-size:14px}
-        #cmdInput:focus{outline:none;border-color:var(--accent)}
+        footer{padding:14px 20px;background:var(--surface);border-top:1px solid var(--border);display:flex;gap:10px;align-items:center}
+        #cmdInput{flex:1;padding:12px 18px;background:var(--bg);border:1.5px solid var(--border);border-radius:25px;color:var(--text);font-size:14px;outline:none}
+        #cmdInput:focus{border-color:var(--accent)}
         #cmdInput::placeholder{color:#555}
-        .circle-btn{width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-        #voiceBtn{background:transparent;border:1px solid var(--border);color:var(--text2)}
+        .circle-btn{width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s}
+        #voiceBtn{background:transparent;border:1.5px solid var(--border);color:var(--text2)}
+        #voiceBtn:hover{border-color:var(--accent)}
         #voiceBtn.active{background:var(--danger);border-color:var(--danger);color:white;animation:pulse 2s infinite}
-        @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(214,48,49,0.4)}70%{box-shadow:0 0 0 12px rgba(214,48,49,0)}100%{box-shadow:0 0 0 0 rgba(214,48,49,0)}}
+        @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,0.4)}70%{box-shadow:0 0 0 12px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
         #sendBtn{background:var(--accent);color:white}
+        #sendBtn:hover{opacity:0.9}
     </style>
 </head>
 <body>
@@ -79,7 +76,7 @@
             <h2>AI Agent</h2>
             <p class="sub">Your intelligent assistant</p>
             <div id="loginForm">
-                <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="you@email.com"></div>
+                <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="you@email.com" autocomplete="email"></div>
                 <div class="field"><label>Password</label><input type="password" id="loginPassword" placeholder="Your password"></div>
                 <button class="btn" onclick="login()">Sign In</button>
                 <p class="auth-link">No account? <a onclick="showRegister()">Create one</a></p>
@@ -111,8 +108,8 @@
             </div>
         </main>
         <footer>
-            <button class="circle-btn" id="voiceBtn" onclick="toggleVoice()" title="Voice command">🎤</button>
-            <input type="text" id="cmdInput" placeholder="Type here..." autofocus>
+            <button class="circle-btn" id="voiceBtn" onclick="toggleVoice()">🎤</button>
+            <input type="text" id="cmdInput" placeholder="Type here...">
             <button class="circle-btn" id="sendBtn" onclick="sendMsg()">➤</button>
         </footer>
     </div>
@@ -122,7 +119,6 @@
         var recognition = null;
         var listening = false;
 
-        // Quick actions
         var quickItems = [
             { icon: '📺', text: 'Open YouTube', cmd: 'Open YouTube' },
             { icon: '🔍', text: 'Search something', cmd: 'Search for cats' },
@@ -130,48 +126,45 @@
             { icon: '😄', text: 'Tell a joke', cmd: 'Tell me a joke' },
             { icon: '⏰', text: 'What time is it?', cmd: 'What time is it?' },
             { icon: '🧮', text: 'Open Calculator', cmd: 'Open calculator' },
-            { icon: '💻', text: 'System info', cmd: 'System info' },
+            { icon: '📁', text: 'Open Files', cmd: 'Open files' },
             { icon: '💬', text: 'Say hello', cmd: 'Hello' }
         ];
 
-        // Voice setup
+        // VOICE - SIMPLE AND WORKING
         function setupVoice() {
-            var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
+            try {
+                var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!SpeechRecognition) {
+                    document.getElementById('voiceBtn').style.display = 'none';
+                    return;
+                }
+                recognition = new SpeechRecognition();
+                recognition.lang = 'en-US';
+                recognition.interimResults = false;
+                recognition.maxAlternatives = 1;
+
+                recognition.onstart = function() {
+                    listening = true;
+                    document.getElementById('voiceBtn').classList.add('active');
+                };
+
+                recognition.onresult = function(event) {
+                    var text = event.results[0][0].transcript;
+                    document.getElementById('cmdInput').value = text;
+                    if (text.trim()) sendMsg();
+                };
+
+                recognition.onerror = function(event) {
+                    console.log('Voice error:', event.error);
+                    stopVoice();
+                };
+
+                recognition.onend = function() {
+                    stopVoice();
+                };
+            } catch(e) {
                 document.getElementById('voiceBtn').style.display = 'none';
-                console.log('Voice not supported');
-                return;
             }
-            recognition = new SpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = false;
-            recognition.lang = 'en-US';
-            
-            recognition.onstart = function() {
-                listening = true;
-                document.getElementById('voiceBtn').classList.add('active');
-                document.getElementById('cmdInput').placeholder = 'Listening...';
-            };
-            
-            recognition.onresult = function(event) {
-                var text = event.results[0][0].transcript;
-                document.getElementById('cmdInput').value = text;
-                if (text.trim()) {
-                    setTimeout(function() { sendMsg(); }, 300);
-                }
-            };
-            
-            recognition.onerror = function(event) {
-                console.log('Voice error:', event.error);
-                if (event.error === 'not-allowed') {
-                    alert('Please allow microphone access in your browser settings to use voice commands.');
-                }
-                stopVoice();
-            };
-            
-            recognition.onend = function() {
-                stopVoice();
-            };
         }
 
         function toggleVoice() {
@@ -186,6 +179,9 @@
                     recognition.start();
                 } catch(e) {
                     stopVoice();
+                    setTimeout(function() {
+                        try { recognition.start(); } catch(e2) {}
+                    }, 200);
                 }
             }
         }
@@ -193,11 +189,9 @@
         function stopVoice() {
             listening = false;
             document.getElementById('voiceBtn').classList.remove('active');
-            document.getElementById('cmdInput').placeholder = 'Type here...';
             try { recognition.stop(); } catch(e) {}
         }
 
-        // Auth functions
         function showRegister() {
             document.getElementById('loginForm').classList.add('hidden');
             document.getElementById('registerForm').classList.remove('hidden');
@@ -222,9 +216,7 @@
                 token = d.token;
                 localStorage.setItem('token', token);
                 showApp();
-            } catch(e) {
-                alert(e.message);
-            }
+            } catch(e) { alert(e.message); }
         }
 
         async function register() {
@@ -232,7 +224,7 @@
             var email = document.getElementById('regEmail').value.trim();
             var password = document.getElementById('regPassword').value;
             if (!name || !email || !password) return alert('Please fill all fields');
-            if (password.length < 6) return alert('Password must be at least 6 characters');
+            if (password.length < 6) return alert('Password too short');
             try {
                 var r = await fetch('/api/auth/register', {
                     method: 'POST',
@@ -244,39 +236,35 @@
                 token = d.token;
                 localStorage.setItem('token', token);
                 showApp();
-            } catch(e) {
-                alert(e.message);
-            }
+            } catch(e) { alert(e.message); }
         }
 
         function showApp() {
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('appScreen').classList.remove('hidden');
-            document.getElementById('cmdInput').focus();
             
-            // Render quick actions
             var grid = document.getElementById('quickGrid');
             grid.innerHTML = '';
             for (var i = 0; i < quickItems.length; i++) {
-                var item = quickItems[i];
-                var card = document.createElement('div');
-                card.className = 'q-card';
-                card.onclick = (function(cmd) { return function() { quickSend(cmd); }; })(item.cmd);
-                card.innerHTML = '<span>' + item.icon + '</span> ' + item.text;
-                grid.appendChild(card);
+                (function(cmd, icon, text) {
+                    var card = document.createElement('div');
+                    card.className = 'q-card';
+                    card.textContent = icon + ' ' + text;
+                    card.onclick = function() {
+                        document.getElementById('cmdInput').value = cmd;
+                        sendMsg();
+                    };
+                    grid.appendChild(card);
+                })(quickItems[i].cmd, quickItems[i].icon, quickItems[i].text);
             }
             
             setupVoice();
+            document.getElementById('cmdInput').focus();
         }
 
         function logout() {
             localStorage.clear();
             location.reload();
-        }
-
-        function quickSend(cmd) {
-            document.getElementById('cmdInput').value = cmd;
-            sendMsg();
         }
 
         async function sendMsg() {
@@ -315,19 +303,15 @@
         function addMessage(text, sender, type, result) {
             var div = document.createElement('div');
             div.className = 'msg ' + sender;
-            
             var html = '<div class="bubble">';
             if (type && sender === 'agent') {
-                var tagText = type === 'command' ? 'ACTION' : 'CHAT';
-                var tagClass = type === 'command' ? 'command' : 'chat';
-                html += '<span class="tag ' + tagClass + '">' + tagText + '</span>';
+                html += '<span class="tag ' + type + '">' + (type === 'command' ? '⚡ ACTION' : '💬 CHAT') + '</span>';
             }
             html += text.replace(/\n/g, '<br>');
             if (result && result !== '' && result !== 'Done') {
-                html += '<span class="result-text">' + result + '</span>';
+                html += '<span class="result-text">✓ ' + result + '</span>';
             }
             html += '</div>';
-            
             div.innerHTML = html;
             document.getElementById('messages').appendChild(div);
             div.scrollIntoView({ behavior: 'smooth' });
@@ -349,7 +333,6 @@
             if (el) el.remove();
         }
 
-        // Keyboard shortcuts
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && document.activeElement === document.getElementById('cmdInput')) {
                 e.preventDefault();
@@ -357,7 +340,6 @@
             }
         });
 
-        // Start app if logged in
         if (token) showApp();
     </script>
 </body>
