@@ -5,105 +5,259 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Agent</title>
     <style>
+        :root {
+            --bg: #0a0a0f;
+            --surface: #13131a;
+            --border: #1e1e2a;
+            --text: #e4e4e7;
+            --text2: #888;
+            --primary: #6366f1;
+            --primary-hover: #5558e6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --radius: 12px;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, sans-serif; background: #000; color: #fff; height: 100vh; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+        }
+
         .hidden { display: none !important; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+        /* Login */
+        .screen { height: 100vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0f 70%); }
         
-        #loginScreen { height: 100vh; display: flex; align-items: center; justify-content: center; }
-        .auth-card { background: #111; padding: 40px; border-radius: 16px; width: 380px; border: 1px solid #222; text-align: center; }
-        .auth-card h1 { font-size: 50px; margin-bottom: 10px; }
-        .auth-card h2 { margin-bottom: 5px; }
-        .auth-card .sub { color: #888; margin-bottom: 30px; font-size: 14px; }
-        .auth-card input { width: 100%; padding: 12px; margin-bottom: 10px; background: #000; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: 15px; }
-        .auth-card input:focus { outline: none; border-color: #3b82f6; }
-        .auth-card button { width: 100%; padding: 12px; background: #3b82f6; color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
-        .auth-card button:hover { opacity: 0.9; }
-        .auth-card .link { margin-top: 20px; color: #888; font-size: 14px; }
-        .auth-card .link a { color: #3b82f6; cursor: pointer; text-decoration: none; }
+        .auth-card {
+            background: var(--surface);
+            padding: 48px;
+            border-radius: 20px;
+            width: 420px;
+            border: 1px solid var(--border);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        }
         
+        .auth-card .logo { font-size: 56px; text-align: center; margin-bottom: 16px; animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        
+        .auth-card h2 { text-align: center; font-size: 24px; margin-bottom: 4px; }
+        .auth-card .subtitle { text-align: center; color: var(--text2); margin-bottom: 32px; font-size: 14px; }
+        
+        .input-group { margin-bottom: 16px; }
+        .input-group label { display: block; margin-bottom: 6px; font-size: 13px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+        .input-group input {
+            width: 100%; padding: 14px 16px;
+            background: var(--bg); border: 2px solid var(--border);
+            border-radius: var(--radius); color: var(--text);
+            font-size: 15px; transition: all 0.2s;
+        }
+        .input-group input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+        
+        .btn {
+            width: 100%; padding: 14px;
+            border: none; border-radius: var(--radius);
+            font-size: 16px; font-weight: 600; cursor: pointer;
+            transition: all 0.2s; margin-top: 8px;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+        .btn-primary:active { transform: translateY(0); }
+        
+        .auth-link { text-align: center; margin-top: 20px; color: var(--text2); font-size: 14px; }
+        .auth-link a { color: var(--primary); cursor: pointer; text-decoration: none; font-weight: 500; }
+        .auth-link a:hover { text-decoration: underline; }
+
+        /* App */
         #appScreen { height: 100vh; display: flex; flex-direction: column; }
-        header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #111; border-bottom: 1px solid #222; }
-        .brand { display: flex; align-items: center; gap: 10px; }
-        .brand .icon { font-size: 28px; }
-        .brand .status { font-size: 11px; color: #10b981; display: block; }
-        header button { padding: 8px 16px; background: #333; color: #fff; border: none; border-radius: 6px; cursor: pointer; margin-left: 8px; }
         
-        main { flex: 1; overflow-y: auto; padding: 20px; }
-        .welcome { text-align: center; margin-top: 60px; }
-        .welcome .icon { font-size: 70px; margin-bottom: 15px; }
-        .welcome h2 { margin-bottom: 5px; }
-        .welcome p { color: #888; margin-bottom: 20px; }
-        .suggestions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-        .sug { padding: 8px 16px; background: #111; border: 1px solid #222; border-radius: 20px; color: #3b82f6; cursor: pointer; font-size: 13px; }
-        .sug:hover { background: #3b82f6; color: #fff; }
+        header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px 24px; background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
         
-        .msg { display: flex; margin-bottom: 15px; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .msg.user { justify-content: flex-end; }
-        .bubble { max-width: 70%; padding: 12px 16px; border-radius: 16px; line-height: 1.5; white-space: pre-wrap; }
-        .user .bubble { background: #3b82f6; border-bottom-right-radius: 4px; }
-        .agent .bubble { background: #111; border: 1px solid #222; border-bottom-left-radius: 4px; }
-        .bubble .result { display: block; margin-top: 5px; font-size: 11px; color: #10b981; }
+        .brand { display: flex; align-items: center; gap: 12px; }
+        .brand .avatar { width: 44px; height: 44px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+        .brand .name { font-weight: 600; font-size: 16px; }
+        .brand .status-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; display: inline-block; margin-right: 4px; animation: pulse-dot 2s infinite; }
+        @keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .brand .status-text { font-size: 12px; color: var(--text2); }
         
-        footer { display: flex; gap: 10px; padding: 15px 20px; background: #111; border-top: 1px solid #222; align-items: center; }
-        footer input { flex: 1; padding: 14px 20px; background: #000; border: 1px solid #333; border-radius: 24px; color: #fff; font-size: 15px; }
-        footer input:focus { outline: none; border-color: #3b82f6; }
-        footer button { padding: 14px 20px; background: #3b82f6; color: #fff; border: none; border-radius: 24px; font-weight: bold; cursor: pointer; }
+        .header-actions { display: flex; gap: 8px; }
+        .btn-icon {
+            width: 40px; height: 40px; border-radius: 50%;
+            border: 1px solid var(--border); background: transparent;
+            color: var(--text); cursor: pointer; font-size: 18px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .btn-icon:hover { background: var(--border); }
+
+        main {
+            flex: 1; overflow-y: auto; padding: 24px;
+            background: linear-gradient(180deg, var(--bg) 0%, #0d0d15 100%);
+        }
         
-        #voiceBtn { background: #10b981; font-size: 20px; }
-        #voiceBtn.listening { background: #ef4444; animation: pulse 1s infinite; }
-        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
-        #voiceStatus { font-size: 12px; color: #10b981; margin-right: 10px; display: none; }
+        .welcome { text-align: center; margin-top: 50px; }
+        .welcome .welcome-icon { font-size: 72px; margin-bottom: 20px; }
+        .welcome h2 { font-size: 28px; margin-bottom: 8px; }
+        .welcome p { color: var(--text2); margin-bottom: 24px; }
+        
+        .quick-actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; max-width: 500px; margin: 0 auto; }
+        .quick-action {
+            padding: 14px; background: var(--surface);
+            border: 1px solid var(--border); border-radius: var(--radius);
+            cursor: pointer; text-align: left; transition: all 0.2s;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .quick-action:hover { border-color: var(--primary); background: rgba(99,102,241,0.05); transform: translateY(-2px); }
+        .quick-action .qa-icon { font-size: 20px; }
+        .quick-action .qa-text { font-size: 13px; font-weight: 500; }
+
+        .message { display: flex; margin-bottom: 20px; animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .message.user { justify-content: flex-end; }
+        
+        .message-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+        .agent .message-avatar { background: var(--primary); margin-right: 10px; }
+        .user .message-avatar { background: #334155; margin-left: 10px; }
+        
+        .bubble {
+            max-width: 72%; padding: 14px 18px;
+            border-radius: 18px; line-height: 1.6;
+            font-size: 14px; word-wrap: break-word;
+        }
+        .user .bubble { background: var(--primary); border-bottom-right-radius: 6px; }
+        .agent .bubble { background: var(--surface); border: 1px solid var(--border); border-bottom-left-radius: 6px; }
+        .bubble .cmd-result { display: block; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 12px; color: var(--success); }
+        .bubble .cmd-result.error { color: var(--danger); }
+
+        footer {
+            padding: 16px 24px; background: var(--surface);
+            border-top: 1px solid var(--border); display: flex;
+            gap: 10px; align-items: center;
+        }
+        
+        #cmdInput {
+            flex: 1; padding: 14px 20px;
+            background: var(--bg); border: 2px solid var(--border);
+            border-radius: 28px; color: var(--text);
+            font-size: 15px; transition: all 0.2s;
+        }
+        #cmdInput:focus { outline: none; border-color: var(--primary); }
+        #cmdInput::placeholder { color: #555; }
+        
+        .btn-send {
+            width: 48px; height: 48px; border-radius: 50%;
+            background: var(--primary); color: white; border: none;
+            font-size: 20px; cursor: pointer; display: flex;
+            align-items: center; justify-content: center;
+            transition: all 0.2s; flex-shrink: 0;
+        }
+        .btn-send:hover { background: var(--primary-hover); transform: scale(1.05); }
+        
+        #voiceBtn {
+            width: 48px; height: 48px; border-radius: 50%;
+            border: 2px solid var(--border); background: transparent;
+            color: var(--text); font-size: 20px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s; flex-shrink: 0;
+        }
+        #voiceBtn:hover { border-color: var(--primary); }
+        #voiceBtn.active {
+            background: var(--danger); border-color: var(--danger);
+            animation: pulse-btn 1.5s infinite;
+        }
+        @keyframes pulse-btn {
+            0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+            50% { box-shadow: 0 0 0 15px rgba(239,68,68,0); }
+        }
+        
+        .typing-indicator { display: flex; gap: 4px; padding: 14px 18px; }
+        .typing-indicator span { width: 8px; height: 8px; background: var(--text2); border-radius: 50%; animation: typing 1.4s infinite; }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-8px); } }
+
+        /* Toast */
+        .toast {
+            position: fixed; top: 20px; right: 20px;
+            padding: 12px 20px; border-radius: 8px;
+            color: white; font-size: 14px; z-index: 1000;
+            animation: toastIn 0.3s ease;
+        }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(100px); } to { opacity: 1; transform: translateX(0); } }
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+        .toast.info { background: var(--primary); }
     </style>
 </head>
 <body>
-    <div id="loginScreen">
+    <!-- Login Screen -->
+    <div id="loginScreen" class="screen">
         <div class="auth-card">
-            <h1>🤖</h1>
+            <div class="logo">🤖</div>
             <h2>AI Agent</h2>
-            <p class="sub">Talk to me or type commands</p>
+            <p class="subtitle">Your voice-powered assistant</p>
+            
             <div id="loginForm">
-                <input type="email" id="loginEmail" placeholder="Email address">
-                <input type="password" id="loginPassword" placeholder="Password">
-                <button onclick="login()">Sign In</button>
-                <p class="link">New user? <a onclick="showRegister()">Create account</a></p>
+                <div class="input-group"><label>Email</label><input type="email" id="loginEmail" placeholder="your@email.com"></div>
+                <div class="input-group"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••"></div>
+                <button class="btn btn-primary" onclick="login()">Sign In</button>
+                <p class="auth-link">New here? <a onclick="showRegister()">Create account</a></p>
             </div>
+            
             <div id="registerForm" class="hidden">
-                <input type="text" id="regName" placeholder="Full name">
-                <input type="email" id="regEmail" placeholder="Email address">
-                <input type="password" id="regPassword" placeholder="Password (min 6 chars)">
-                <button onclick="register()">Create Account</button>
-                <p class="link">Have an account? <a onclick="showLogin()">Sign in</a></p>
+                <div class="input-group"><label>Name</label><input type="text" id="regName" placeholder="John Doe"></div>
+                <div class="input-group"><label>Email</label><input type="email" id="regEmail" placeholder="your@email.com"></div>
+                <div class="input-group"><label>Password</label><input type="password" id="regPassword" placeholder="Min 6 characters"></div>
+                <button class="btn btn-primary" onclick="register()">Create Account</button>
+                <p class="auth-link">Already have one? <a onclick="showLogin()">Sign in</a></p>
             </div>
         </div>
     </div>
 
+    <!-- App Screen -->
     <div id="appScreen" class="hidden">
         <header>
             <div class="brand">
-                <span class="icon">🤖</span>
+                <div class="avatar">🤖</div>
                 <div>
-                    <strong>AI Agent</strong>
-                    <span class="status">● Online</span>
+                    <div class="name">AI Agent</div>
+                    <div><span class="status-dot"></span><span class="status-text">Online</span></div>
                 </div>
             </div>
-            <div>
-                <button onclick="logout()">Logout</button>
+            <div class="header-actions">
+                <button class="btn-icon" onclick="clearChat()" title="Clear chat">🗑️</button>
+                <button class="btn-icon" onclick="logout()" title="Logout">🚪</button>
             </div>
         </header>
+        
         <main id="messages">
             <div class="welcome" id="welcome">
-                <div class="icon">🤖</div>
+                <div class="welcome-icon">🤖</div>
                 <h2>How can I help you?</h2>
-                <p>Type or use voice 🎤</p>
-                <div class="suggestions" id="suggestions"></div>
+                <p>Type a command or click 🎤 to speak</p>
+                <div class="quick-actions" id="quickActions"></div>
             </div>
         </main>
+        
         <footer>
-            <span id="voiceStatus">🎤 Listening...</span>
-            <input type="text" id="cmdInput" placeholder="Type or use voice..." autofocus>
             <button id="voiceBtn" onclick="toggleVoice()" title="Voice command">🎤</button>
-            <button onclick="send()">Send</button>
+            <input type="text" id="cmdInput" placeholder="Type or speak a command..." autofocus>
+            <button class="btn-send" onclick="send()">➤</button>
         </footer>
     </div>
 
@@ -112,31 +266,73 @@
         const API = '';
         let recognition = null;
         let isListening = false;
-        
-        const suggestions = [
-            'Open YouTube', 'Search for cats', 'Weather in London',
-            'Open calculator', 'What time is it?', 'Tell me a joke',
-            'Play music on YouTube', 'Who are you?', 'Open GitHub'
+
+        const quickActions = [
+            { icon: '📺', text: 'Open YouTube', cmd: 'Open YouTube' },
+            { icon: '🔍', text: 'Search something', cmd: 'Search for cats' },
+            { icon: '🌤️', text: 'Check weather', cmd: 'Weather in London' },
+            { icon: '😂', text: 'Tell a joke', cmd: 'Tell me a joke' },
+            { icon: '⏰', text: 'What time is it?', cmd: 'What time is it?' },
+            { icon: '🧮', text: 'Open Calculator', cmd: 'Open calculator' },
+            { icon: '🐙', text: 'Open GitHub', cmd: 'Open GitHub' },
+            { icon: '💬', text: 'Say hello', cmd: 'Hello' }
         ];
 
-        // Voice Recognition Setup
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        // ============ VOICE RECOGNITION ============
+        function initVoice() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            
+            if (!SpeechRecognition) {
+                document.getElementById('voiceBtn').style.display = 'none';
+                console.log('Voice not supported');
+                return;
+            }
+            
             recognition = new SpeechRecognition();
             recognition.continuous = false;
-            recognition.interimResults = false;
+            recognition.interimResults = true;
             recognition.lang = 'en-US';
+            recognition.maxAlternatives = 1;
+            
+            recognition.onstart = () => {
+                isListening = true;
+                document.getElementById('voiceBtn').classList.add('active');
+                document.getElementById('cmdInput').placeholder = '🎤 Listening...';
+                showToast('🎤 Listening... Speak now', 'info');
+            };
             
             recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
                 document.getElementById('cmdInput').value = transcript;
-                stopVoice();
-                send();
+                
+                // Auto-send on final result
+                if (event.results[0].isFinal) {
+                    setTimeout(() => {
+                        if (transcript.trim()) send();
+                    }, 500);
+                }
             };
             
             recognition.onerror = (event) => {
-                stopVoice();
                 console.error('Voice error:', event.error);
+                stopVoice();
+                
+                switch(event.error) {
+                    case 'not-allowed':
+                        showToast('Microphone access denied. Please allow microphone permissions.', 'error');
+                        break;
+                    case 'no-speech':
+                        showToast('No speech detected. Try again.', 'error');
+                        break;
+                    case 'audio-capture':
+                        showToast('No microphone found. Please check your device.', 'error');
+                        break;
+                    default:
+                        showToast('Voice error: ' + event.error, 'error');
+                }
             };
             
             recognition.onend = () => stopVoice();
@@ -144,9 +340,10 @@
 
         function toggleVoice() {
             if (!recognition) {
-                alert('Voice recognition is not supported in your browser. Please use Chrome.');
+                showToast('Voice not supported in this browser. Please use Chrome.', 'error');
                 return;
             }
+            
             if (isListening) {
                 stopVoice();
             } else {
@@ -155,59 +352,119 @@
         }
 
         function startVoice() {
-            isListening = true;
-            document.getElementById('voiceBtn').classList.add('listening');
-            document.getElementById('voiceStatus').style.display = 'inline';
-            recognition.start();
+            if (!recognition) return;
+            try {
+                recognition.start();
+                console.log('Voice started');
+            } catch (e) {
+                console.error('Start error:', e);
+                stopVoice();
+                // Retry once
+                setTimeout(() => {
+                    try { recognition.start(); } catch(e2) {}
+                }, 100);
+            }
         }
 
         function stopVoice() {
             isListening = false;
-            document.getElementById('voiceBtn').classList.remove('listening');
-            document.getElementById('voiceStatus').style.display = 'none';
+            document.getElementById('voiceBtn').classList.remove('active');
+            document.getElementById('cmdInput').placeholder = 'Type or speak a command...';
             try { recognition.stop(); } catch(e) {}
         }
 
-        function showRegister() { document.getElementById('loginForm').classList.add('hidden'); document.getElementById('registerForm').classList.remove('hidden'); }
-        function showLogin() { document.getElementById('registerForm').classList.add('hidden'); document.getElementById('loginForm').classList.remove('hidden'); }
+        // ============ AUTH ============
+        function showRegister() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.remove('hidden');
+        }
+        function showLogin() {
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+        }
 
         async function login() {
-            const email = document.getElementById('loginEmail').value;
+            const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
-            if (!email || !password) return alert('Fill all fields');
+            if (!email || !password) return showToast('Please fill all fields', 'error');
+            
             try {
-                const res = await fetch(`${API}/api/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
+                const res = await fetch(`${API}/api/auth/login`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
                 const data = await res.json();
-                if (!res.ok) throw new Error(data.error);
-                token = data.token; localStorage.setItem('token', token);
+                if (!res.ok) throw new Error(data.error || 'Login failed');
+                token = data.token;
+                localStorage.setItem('token', token);
+                showToast('Welcome back!', 'success');
                 showApp();
-            } catch (e) { alert(e.message); }
+            } catch (e) { showToast(e.message, 'error'); }
         }
 
         async function register() {
-            const name = document.getElementById('regName').value;
-            const email = document.getElementById('regEmail').value;
+            const name = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
             const password = document.getElementById('regPassword').value;
-            if (!name || !email || !password) return alert('Fill all fields');
-            if (password.length < 6) return alert('Password too short');
+            
+            if (!name || !email || !password) return showToast('Please fill all fields', 'error');
+            if (password.length < 6) return showToast('Password must be at least 6 characters', 'error');
+            
             try {
-                const res = await fetch(`${API}/api/auth/register`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, email, password }) });
+                const res = await fetch(`${API}/api/auth/register`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password })
+                });
                 const data = await res.json();
-                if (!res.ok) throw new Error(data.error);
-                token = data.token; localStorage.setItem('token', token);
+                if (!res.ok) throw new Error(data.error || 'Registration failed');
+                token = data.token;
+                localStorage.setItem('token', token);
+                showToast('Account created!', 'success');
                 showApp();
-            } catch (e) { alert(e.message); }
+            } catch (e) { showToast(e.message, 'error'); }
         }
 
+        // ============ APP ============
         function showApp() {
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('appScreen').classList.remove('hidden');
             document.getElementById('cmdInput').focus();
-            document.getElementById('suggestions').innerHTML = suggestions.map(s => `<span class="sug" onclick="quickSend('${s}')">${s}</span>`).join('');
+            
+            // Load quick actions
+            const qaDiv = document.getElementById('quickActions');
+            qaDiv.innerHTML = quickActions.map(q => `
+                <div class="quick-action" onclick="quickSend('${q.cmd}')">
+                    <span class="qa-icon">${q.icon}</span>
+                    <span class="qa-text">${q.text}</span>
+                </div>
+            `).join('');
+            
+            // Initialize voice
+            initVoice();
         }
 
-        function logout() { localStorage.removeItem('token'); token = null; location.reload(); }
-        function quickSend(cmd) { document.getElementById('cmdInput').value = cmd; send(); }
+        function logout() {
+            localStorage.removeItem('token');
+            token = null;
+            location.reload();
+        }
+
+        function clearChat() {
+            document.getElementById('messages').innerHTML = `
+                <div class="welcome" id="welcome">
+                    <div class="welcome-icon">🤖</div>
+                    <h2>How can I help you?</h2>
+                    <p>Type a command or click 🎤 to speak</p>
+                    <div class="quick-actions" id="quickActions"></div>
+                </div>
+            `;
+            showApp();
+        }
+
+        function quickSend(cmd) {
+            document.getElementById('cmdInput').value = cmd;
+            send();
+        }
 
         async function send() {
             const input = document.getElementById('cmdInput');
@@ -215,32 +472,97 @@
             if (!cmd) return;
             
             document.getElementById('welcome')?.remove();
-            addMsg(cmd, 'user');
+            addMessage(cmd, 'user');
             input.value = '';
             
+            // Show typing indicator
+            const typingId = showTyping();
+            
             try {
-                const res = await fetch(`${API}/api/agent`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ message: cmd }) });
+                const res = await fetch(`${API}/api/agent`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ message: cmd })
+                });
+                
                 const data = await res.json();
+                removeTyping(typingId);
+                
                 if (!res.ok) throw new Error(data.error);
-                addMsg(data.message, 'agent', data.result);
-            } catch (e) { addMsg('Sorry, something went wrong.', 'agent'); }
+                addMessage(data.message, 'agent', data.result);
+            } catch (e) {
+                removeTyping(typingId);
+                addMessage('Sorry, something went wrong. Please try again.', 'agent', null, true);
+            }
         }
 
-        function addMsg(text, type, result) {
+        function addMessage(text, type, result, isError) {
             const div = document.createElement('div');
-            div.className = `msg ${type}`;
-            let html = `<div class="bubble">${text}`;
-            if (result) html += `<span class="result">✓ ${result}</span>`;
+            div.className = `message ${type}`;
+            
+            const avatar = type === 'user' ? '👤' : '🤖';
+            
+            let html = '';
+            if (type === 'agent') html += `<div class="message-avatar">${avatar}</div>`;
+            html += `<div class="bubble">${escapeHtml(text)}`;
+            if (result) html += `<span class="cmd-result ${isError ? 'error' : ''}">✓ ${escapeHtml(result)}</span>`;
             html += '</div>';
+            if (type === 'user') html += `<div class="message-avatar">${avatar}</div>`;
+            
             div.innerHTML = html;
             document.getElementById('messages').appendChild(div);
             div.scrollIntoView({ behavior: 'smooth' });
         }
 
+        function showTyping() {
+            const div = document.createElement('div');
+            div.className = 'message agent';
+            div.id = 'typing-' + Date.now();
+            div.innerHTML = `
+                <div class="message-avatar">🤖</div>
+                <div class="bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div>
+            `;
+            document.getElementById('messages').appendChild(div);
+            div.scrollIntoView({ behavior: 'smooth' });
+            return div.id;
+        }
+
+        function removeTyping(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && document.activeElement === document.getElementById('cmdInput')) send();
+            if (e.key === 'Enter' && document.activeElement === document.getElementById('cmdInput')) {
+                e.preventDefault();
+                send();
+            }
+            // Ctrl+M to toggle voice
+            if (e.ctrlKey && e.key === 'm') {
+                e.preventDefault();
+                toggleVoice();
+            }
         });
 
+        // Start app if logged in
         if (token) showApp();
     </script>
 </body>
