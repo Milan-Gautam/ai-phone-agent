@@ -3,62 +3,219 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Phone Agent</title>
-    <link rel="stylesheet" href="/style.css">
+    <title>AI Agent</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, sans-serif; background: #000; color: #fff; height: 100vh; }
+        .hidden { display: none !important; }
+        
+        /* Login */
+        #loginScreen { height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .auth-card { background: #111; padding: 40px; border-radius: 16px; width: 380px; border: 1px solid #222; text-align: center; }
+        .auth-card h1 { font-size: 50px; margin-bottom: 10px; }
+        .auth-card h2 { margin-bottom: 5px; }
+        .auth-card .sub { color: #888; margin-bottom: 30px; font-size: 14px; }
+        .auth-card input { width: 100%; padding: 12px; margin-bottom: 10px; background: #000; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: 15px; }
+        .auth-card input:focus { outline: none; border-color: #3b82f6; }
+        .auth-card button { width: 100%; padding: 12px; background: #3b82f6; color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .auth-card button:hover { opacity: 0.9; }
+        .auth-card .link { margin-top: 20px; color: #888; font-size: 14px; }
+        .auth-card .link a { color: #3b82f6; cursor: pointer; text-decoration: none; }
+        
+        /* App */
+        #appScreen { height: 100vh; display: flex; flex-direction: column; }
+        header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #111; border-bottom: 1px solid #222; }
+        .brand { display: flex; align-items: center; gap: 10px; }
+        .brand .icon { font-size: 28px; }
+        .brand .status { font-size: 11px; color: #10b981; display: block; }
+        header button { padding: 8px 16px; background: #333; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+        
+        main { flex: 1; overflow-y: auto; padding: 20px; }
+        .welcome { text-align: center; margin-top: 80px; }
+        .welcome .icon { font-size: 70px; margin-bottom: 15px; }
+        .welcome h2 { margin-bottom: 5px; }
+        .welcome p { color: #888; margin-bottom: 20px; }
+        .suggestions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+        .sug { padding: 8px 16px; background: #111; border: 1px solid #222; border-radius: 20px; color: #3b82f6; cursor: pointer; font-size: 13px; }
+        .sug:hover { background: #3b82f6; color: #fff; border-color: #3b82f6; }
+        
+        .msg { display: flex; margin-bottom: 15px; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .msg.user { justify-content: flex-end; }
+        .bubble { max-width: 70%; padding: 12px 16px; border-radius: 16px; line-height: 1.5; }
+        .user .bubble { background: #3b82f6; border-bottom-right-radius: 4px; }
+        .agent .bubble { background: #111; border: 1px solid #222; border-bottom-left-radius: 4px; }
+        .bubble .result { display: block; margin-top: 5px; font-size: 11px; color: #10b981; }
+        
+        footer { display: flex; gap: 10px; padding: 15px 20px; background: #111; border-top: 1px solid #222; }
+        footer input { flex: 1; padding: 14px 20px; background: #000; border: 1px solid #333; border-radius: 24px; color: #fff; font-size: 15px; }
+        footer input:focus { outline: none; border-color: #3b82f6; }
+        footer button { padding: 14px 24px; background: #3b82f6; color: #fff; border: none; border-radius: 24px; font-weight: bold; cursor: pointer; }
+    </style>
 </head>
 <body>
-    <!-- Login Screen -->
-    <div id="loginScreen" class="screen">
+    <div id="loginScreen">
         <div class="auth-card">
-            <div class="logo">🤖</div>
-            <h1>AI Agent</h1>
-            <p class="subtitle">Your Personal Device Assistant</p>
-            
+            <h1>🤖</h1>
+            <h2>AI Agent</h2>
+            <p class="sub">Your Personal Device Assistant</p>
             <div id="loginForm">
-                <input type="email" id="loginEmail" placeholder="Email address" autocomplete="email">
+                <input type="email" id="loginEmail" placeholder="Email address">
                 <input type="password" id="loginPassword" placeholder="Password">
-                <button onclick="handleLogin()" class="btn-primary">Sign In</button>
-                <p class="switch">New user? <a onclick="showRegister()">Create account</a></p>
+                <button onclick="login()">Sign In</button>
+                <p class="link">New user? <a onclick="showRegister()">Create account</a></p>
             </div>
-            
             <div id="registerForm" class="hidden">
                 <input type="text" id="regName" placeholder="Full name">
                 <input type="email" id="regEmail" placeholder="Email address">
                 <input type="password" id="regPassword" placeholder="Password (min 6 chars)">
-                <button onclick="handleRegister()" class="btn-primary">Create Account</button>
-                <p class="switch">Have an account? <a onclick="showLogin()">Sign in</a></p>
+                <button onclick="register()">Create Account</button>
+                <p class="link">Have an account? <a onclick="showLogin()">Sign in</a></p>
             </div>
         </div>
     </div>
 
-    <!-- Main App -->
-    <div id="appScreen" class="screen hidden">
+    <div id="appScreen" class="hidden">
         <header>
             <div class="brand">
-                <span class="avatar">🤖</span>
+                <span class="icon">🤖</span>
                 <div>
-                    <h2>AI Agent</h2>
+                    <strong>AI Agent</strong>
                     <span class="status">● Online</span>
                 </div>
             </div>
-            <button onclick="logout()" class="btn-secondary">Logout</button>
+            <button onclick="logout()">Logout</button>
         </header>
-
         <main id="messages">
-            <div class="welcome">
-                <div class="welcome-icon">🤖</div>
+            <div class="welcome" id="welcome">
+                <div class="icon">🤖</div>
                 <h2>How can I help you?</h2>
                 <p>Try these commands:</p>
                 <div class="suggestions" id="suggestions"></div>
             </div>
         </main>
-
         <footer>
-            <input type="text" id="commandInput" placeholder="Type a command..." autofocus>
-            <button onclick="sendCommand()" class="btn-send">Send</button>
+            <input type="text" id="cmdInput" placeholder="Type a command..." autofocus>
+            <button onclick="send()">Send</button>
         </footer>
     </div>
 
-    <script src="/script.js"></script>
+    <script>
+        let token = localStorage.getItem('token');
+        const API = '';
+        
+        const suggestions = [
+            'Open YouTube', 'Search for cats', 'Weather in London',
+            'Open calculator', 'What time is it?', 'Open github.com',
+            'Play music on YouTube', 'Open Facebook'
+        ];
+
+        function showRegister() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.remove('hidden');
+        }
+        function showLogin() {
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+        }
+
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            if (!email || !password) return alert('Fill all fields');
+            try {
+                const res = await fetch(`${API}/api/auth/login`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error);
+                token = data.token;
+                localStorage.setItem('token', token);
+                showApp();
+            } catch (e) { alert(e.message); }
+        }
+
+        async function register() {
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            if (!name || !email || !password) return alert('Fill all fields');
+            if (password.length < 6) return alert('Password too short');
+            try {
+                const res = await fetch(`${API}/api/auth/register`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error);
+                token = data.token;
+                localStorage.setItem('token', token);
+                showApp();
+            } catch (e) { alert(e.message); }
+        }
+
+        function showApp() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('appScreen').classList.remove('hidden');
+            document.getElementById('cmdInput').focus();
+            
+            const sugDiv = document.getElementById('suggestions');
+            sugDiv.innerHTML = suggestions.map(s => 
+                `<span class="sug" onclick="quickSend('${s}')">${s}</span>`
+            ).join('');
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            token = null;
+            location.reload();
+        }
+
+        function quickSend(cmd) {
+            document.getElementById('cmdInput').value = cmd;
+            send();
+        }
+
+        async function send() {
+            const input = document.getElementById('cmdInput');
+            const cmd = input.value.trim();
+            if (!cmd) return;
+            
+            document.getElementById('welcome')?.remove();
+            addMsg(cmd, 'user');
+            input.value = '';
+            
+            try {
+                const res = await fetch(`${API}/api/agent`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ message: cmd })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error);
+                addMsg(data.message, 'agent', data.result);
+            } catch (e) {
+                addMsg('Sorry, something went wrong.', 'agent');
+            }
+        }
+
+        function addMsg(text, type, result) {
+            const div = document.createElement('div');
+            div.className = `msg ${type}`;
+            let html = `<div class="bubble">${text}`;
+            if (result) html += `<span class="result">✓ ${result}</span>`;
+            html += '</div>';
+            div.innerHTML = html;
+            document.getElementById('messages').appendChild(div);
+            div.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && document.activeElement === document.getElementById('cmdInput')) send();
+        });
+
+        if (token) showApp();
+    </script>
 </body>
 </html>
