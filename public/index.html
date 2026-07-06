@@ -6,97 +6,52 @@
     <title>AI Agent</title>
     <style>
         :root {
-            --bg: #0c0c0f;
-            --surface: #16161d;
-            --surface2: #1c1c24;
-            --border: #2a2a35;
-            --text: #e8e8ed;
-            --text2: #8888a0;
-            --accent: #6c5ce7;
-            --accent2: #a29bfe;
-            --success: #00b894;
-            --danger: #d63031;
-            --warning: #fdcb6e;
-            --radius: 14px;
-            --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --bg: #0c0c0f; --surface: #16161d; --surface2: #1c1c24;
+            --border: #2a2a35; --text: #e8e8ed; --text2: #8888a0;
+            --accent: #6c5ce7; --accent2: #a29bfe; --success: #00b894; --danger: #d63031;
+            --radius: 14px; --font: 'Inter', -apple-system, sans-serif;
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: var(--font); background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
         .hidden { display: none !important; }
-
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
 
         .screen { height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg); }
-        
-        .auth-card {
-            background: var(--surface); padding: 44px 40px; border-radius: 20px;
-            width: 420px; border: 1px solid var(--border);
-            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-        }
+        .auth-card { background: var(--surface); padding: 44px 40px; border-radius: 20px; width: 420px; border: 1px solid var(--border); box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
         .auth-card .icon { width: 64px; height: 64px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 20px; }
-        .auth-card h2 { text-align: center; font-size: 22px; font-weight: 600; margin-bottom: 4px; letter-spacing: -0.3px; }
+        .auth-card h2 { text-align: center; font-size: 22px; font-weight: 600; margin-bottom: 4px; }
         .auth-card .sub { text-align: center; color: var(--text2); font-size: 13px; margin-bottom: 32px; }
-        
         .field { margin-bottom: 16px; }
         .field label { display: block; font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; font-weight: 600; }
-        .field input {
-            width: 100%; padding: 13px 15px; background: var(--bg);
-            border: 1.5px solid var(--border); border-radius: 10px;
-            color: var(--text); font-size: 14px; font-family: var(--font);
-            transition: all 0.2s;
-        }
+        .field input { width: 100%; padding: 13px 15px; background: var(--bg); border: 1.5px solid var(--border); border-radius: 10px; color: var(--text); font-size: 14px; font-family: var(--font); transition: all 0.2s; }
         .field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(108,92,231,0.1); }
-        
-        .btn {
-            width: 100%; padding: 13px; border: none; border-radius: 10px;
-            font-size: 14px; font-weight: 600; cursor: pointer; font-family: var(--font);
-            transition: all 0.2s; letter-spacing: 0.2px;
-        }
+        .btn { width: 100%; padding: 13px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: var(--font); transition: all 0.2s; }
         .btn-primary { background: var(--accent); color: white; }
         .btn-primary:hover { background: #5f50d9; transform: translateY(-1px); box-shadow: 0 8px 25px rgba(108,92,231,0.3); }
-        
         .auth-link { text-align: center; margin-top: 20px; font-size: 13px; color: var(--text2); }
         .auth-link a { color: var(--accent2); cursor: pointer; text-decoration: none; font-weight: 500; }
         .auth-link a:hover { text-decoration: underline; }
 
         #appScreen { height: 100vh; display: flex; flex-direction: column; }
-        
-        header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 14px 24px; background: var(--surface); border-bottom: 1px solid var(--border);
-        }
+        header { display: flex; justify-content: space-between; align-items: center; padding: 14px 24px; background: var(--surface); border-bottom: 1px solid var(--border); }
         .brand { display: flex; align-items: center; gap: 12px; }
         .brand .avatar { width: 38px; height: 38px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
         .brand h3 { font-size: 15px; font-weight: 600; }
         .brand .dot { width: 7px; height: 7px; background: var(--success); border-radius: 50%; display: inline-block; margin-right: 4px; }
         .brand .status-text { font-size: 11px; color: var(--text2); }
-        
         .header-btns { display: flex; gap: 8px; }
-        .icon-btn {
-            width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border);
-            background: transparent; color: var(--text2); cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 15px; transition: all 0.2s;
-        }
+        .icon-btn { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text2); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; transition: all 0.2s; }
         .icon-btn:hover { background: var(--surface2); color: var(--text); }
 
         main { flex: 1; overflow-y: auto; padding: 24px; }
-        
         .welcome { text-align: center; margin-top: 60px; }
         .welcome .w-icon { width: 72px; height: 72px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 20px; }
         .welcome h2 { font-size: 24px; font-weight: 600; margin-bottom: 6px; }
         .welcome p { color: var(--text2); font-size: 14px; margin-bottom: 28px; }
-        
         .quick-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-width: 480px; margin: 0 auto; }
-        .q-card {
-            padding: 14px 16px; background: var(--surface);
-            border: 1px solid var(--border); border-radius: 12px;
-            cursor: pointer; transition: all 0.2s;
-            display: flex; align-items: center; gap: 10px;
-        }
+        .q-card { padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 10px; }
         .q-card:hover { border-color: var(--accent); background: var(--surface2); transform: translateY(-1px); }
         .q-card .q-icon { font-size: 20px; }
         .q-card .q-label { font-size: 13px; font-weight: 500; }
@@ -107,19 +62,11 @@
         .msg-avatar { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
         .agent .msg-avatar { background: linear-gradient(135deg, var(--accent), var(--accent2)); margin-right: 10px; }
         .user .msg-avatar { background: var(--surface2); margin-left: 10px; }
-        
-        .bubble {
-            max-width: 70%; padding: 12px 16px; border-radius: 14px;
-            font-size: 14px; line-height: 1.6; word-wrap: break-word; white-space: pre-wrap;
-        }
+        .bubble { max-width: 70%; padding: 12px 16px; border-radius: 14px; font-size: 14px; line-height: 1.6; word-wrap: break-word; white-space: pre-wrap; }
         .user .bubble { background: var(--accent); color: white; border-bottom-right-radius: 4px; }
         .agent .bubble { background: var(--surface); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
-        .agent .bubble .tag {
-            display: inline-block; padding: 2px 8px; border-radius: 4px;
-            font-size: 10px; font-weight: 600; text-transform: uppercase;
-            margin-bottom: 6px; letter-spacing: 0.5px;
-        }
-        .tag.cmd { background: rgba(108,92,231,0.15); color: var(--accent2); }
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px; }
+        .tag.command { background: rgba(108,92,231,0.15); color: var(--accent2); }
         .tag.chat { background: rgba(0,184,148,0.15); color: var(--success); }
         .exec-result { display: block; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 12px; color: var(--success); }
 
@@ -129,50 +76,23 @@
         .typing span:nth-child(3) { animation-delay: 0.4s; }
         @keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
 
-        footer {
-            padding: 14px 20px; background: var(--surface);
-            border-top: 1px solid var(--border); display: flex;
-            gap: 10px; align-items: center;
-        }
-        #cmdInput {
-            flex: 1; padding: 12px 18px; background: var(--bg);
-            border: 1.5px solid var(--border); border-radius: 25px;
-            color: var(--text); font-size: 14px; font-family: var(--font);
-            transition: all 0.2s;
-        }
+        footer { padding: 14px 20px; background: var(--surface); border-top: 1px solid var(--border); display: flex; gap: 10px; align-items: center; }
+        #cmdInput { flex: 1; padding: 12px 18px; background: var(--bg); border: 1.5px solid var(--border); border-radius: 25px; color: var(--text); font-size: 14px; font-family: var(--font); transition: all 0.2s; }
         #cmdInput:focus { outline: none; border-color: var(--accent); }
         #cmdInput::placeholder { color: #555; }
-        
-        .circle-btn {
-            width: 42px; height: 42px; border-radius: 50%;
-            border: none; cursor: pointer; display: flex;
-            align-items: center; justify-content: center;
-            font-size: 18px; transition: all 0.2s; flex-shrink: 0;
-        }
+        .circle-btn { width: 42px; height: 42px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: all 0.2s; flex-shrink: 0; }
         #voiceBtn { background: transparent; border: 1.5px solid var(--border); color: var(--text2); }
         #voiceBtn:hover { border-color: var(--accent); color: var(--accent); }
         #voiceBtn.active { background: var(--danger); border-color: var(--danger); color: white; animation: pulse-ring 2s infinite; }
         @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(214,48,49,0.4); } 70% { box-shadow: 0 0 0 12px rgba(214,48,49,0); } 100% { box-shadow: 0 0 0 0 rgba(214,48,49,0); } }
-        
         #sendBtn { background: var(--accent); color: white; }
         #sendBtn:hover { background: #5f50d9; }
 
-        .toast {
-            position: fixed; top: 20px; right: 20px; z-index: 999;
-            padding: 12px 20px; border-radius: 10px; color: white;
-            font-size: 13px; font-weight: 500; animation: slideIn 0.3s ease;
-            max-width: 350px;
-        }
+        .toast { position: fixed; top: 20px; right: 20px; z-index: 999; padding: 12px 20px; border-radius: 10px; color: white; font-size: 13px; font-weight: 500; animation: slideIn 0.3s ease; max-width: 350px; }
         @keyframes slideIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
         .toast.success { background: var(--success); }
         .toast.error { background: var(--danger); }
         .toast.info { background: var(--accent); }
-
-        @media (max-width: 500px) {
-            .auth-card { width: 100%; margin: 20px; padding: 30px 24px; }
-            .bubble { max-width: 85%; }
-            .quick-grid { grid-template-columns: 1fr; }
-        }
     </style>
 </head>
 <body>
@@ -182,7 +102,7 @@
             <h2>AI Agent</h2>
             <p class="sub">Your intelligent assistant</p>
             <div id="loginForm">
-                <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="you@email.com" autocomplete="email"></div>
+                <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="you@email.com"></div>
                 <div class="field"><label>Password</label><input type="password" id="loginPassword" placeholder="Your password"></div>
                 <button class="btn btn-primary" onclick="login()">Sign In</button>
                 <p class="auth-link">No account? <a onclick="showRegister()">Create one</a></p>
@@ -201,14 +121,11 @@
         <header>
             <div class="brand">
                 <div class="avatar">⚡</div>
-                <div>
-                    <h3>AI Agent</h3>
-                    <div><span class="dot"></span><span class="status-text">Active</span></div>
-                </div>
+                <div><h3>AI Agent</h3><div><span class="dot"></span><span class="status-text">Active</span></div></div>
             </div>
             <div class="header-btns">
-                <button class="icon-btn" onclick="clearChat()" title="Clear">↻</button>
-                <button class="icon-btn" onclick="logout()" title="Logout">→</button>
+                <button class="icon-btn" onclick="clearChat()">↻</button>
+                <button class="icon-btn" onclick="logout()">→</button>
             </div>
         </header>
         <main id="messages">
@@ -220,7 +137,7 @@
             </div>
         </main>
         <footer>
-            <button class="circle-btn" id="voiceBtn" onclick="toggleVoice()" title="Voice (Ctrl+M)">🎤</button>
+            <button class="circle-btn" id="voiceBtn" onclick="toggleVoice()">🎤</button>
             <input type="text" id="cmdInput" placeholder="Ask me anything..." autofocus>
             <button class="circle-btn" id="sendBtn" onclick="send()">➤</button>
         </footer>
@@ -228,7 +145,6 @@
 
     <script>
         let token = localStorage.getItem('token');
-        const API = '';
         let recognition = null;
         let listening = false;
 
@@ -243,58 +159,48 @@
             { icon: '💬', label: 'Say hello', cmd: 'Hello' }
         ];
 
-        // ============ VOICE (FIXED) ============
         function initVoice() {
             const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SR) { document.getElementById('voiceBtn').style.display = 'none'; return; }
-            
             recognition = new SR();
-            recognition.continuous = true;
+            recognition.continuous = false;
             recognition.interimResults = true;
             recognition.lang = 'en-US';
             
             recognition.onstart = () => {
                 listening = true;
                 document.getElementById('voiceBtn').classList.add('active');
-                document.getElementById('cmdInput').placeholder = 'Listening...';
+                document.getElementById('cmdInput').placeholder = '🎤 Speaking...';
+                document.getElementById('cmdInput').value = '';
             };
             
-            recognition.onresult = (e) => {
-                let t = '';
-                for (let i = e.resultIndex; i < e.results.length; i++) {
-                    t += e.results[i][0].transcript;
+            recognition.onresult = (event) => {
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
                 }
-                document.getElementById('cmdInput').value = t;
-                if (e.results[e.results.length - 1].isFinal) {
-                    setTimeout(() => { if (t.trim()) send(); }, 600);
+                document.getElementById('cmdInput').value = transcript;
+                if (event.results[event.results.length - 1].isFinal && transcript.trim()) {
+                    setTimeout(() => send(), 400);
                 }
             };
             
-            recognition.onerror = (e) => {
-                console.log('Voice:', e.error);
-                if (e.error === 'not-allowed') toast('Microphone blocked. Allow in browser settings.', 'error');
-                else if (e.error === 'no-speech') { /* ignore */ }
-                else if (e.error === 'network') {
-                    stopVoice();
-                    setTimeout(() => { try { recognition.start(); } catch(ex) {} }, 300);
-                    return;
-                }
+            recognition.onerror = (event) => {
+                console.log('Voice:', event.error);
+                if (event.error === 'not-allowed') toast('Microphone blocked. Allow in browser settings.', 'error');
+                if (event.error !== 'no-speech' && event.error !== 'aborted') toast('Voice error: ' + event.error, 'error');
                 stopVoice();
             };
             
-            recognition.onend = () => {
-                if (listening) {
-                    try { recognition.start(); } catch(e) { stopVoice(); }
-                }
-            };
+            recognition.onend = () => stopVoice();
         }
 
         function toggleVoice() {
-            if (!recognition) { toast('Use Chrome for voice support', 'info'); return; }
+            if (!recognition) { toast('Use Chrome/Edge for voice', 'info'); return; }
             listening ? stopVoice() : startVoice();
         }
         function startVoice() {
-            try { recognition.start(); } catch(e) { stopVoice(); }
+            try { recognition.start(); } catch(e) { stopVoice(); setTimeout(() => { try { recognition.start(); } catch(e2) {} }, 300); }
         }
         function stopVoice() {
             listening = false;
@@ -303,7 +209,6 @@
             try { recognition.stop(); } catch(e) {}
         }
 
-        // ============ AUTH ============
         function showRegister() { document.getElementById('loginForm').classList.add('hidden'); document.getElementById('registerForm').classList.remove('hidden'); }
         function showLogin() { document.getElementById('registerForm').classList.add('hidden'); document.getElementById('loginForm').classList.remove('hidden'); }
 
@@ -311,11 +216,9 @@
             const e = document.getElementById('loginEmail').value.trim(), p = document.getElementById('loginPassword').value;
             if (!e || !p) return toast('Fill all fields', 'error');
             try {
-                const r = await fetch(`${API}/api/auth/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email:e,password:p}) });
-                const d = await r.json();
-                if (!r.ok) throw new Error(d.error);
-                token = d.token; localStorage.setItem('token', token);
-                toast('Welcome!', 'success'); showApp();
+                const r = await fetch('/api/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email:e,password:p}) });
+                const d = await r.json(); if (!r.ok) throw new Error(d.error);
+                token = d.token; localStorage.setItem('token', token); showApp();
             } catch(x) { toast(x.message, 'error'); }
         }
 
@@ -324,22 +227,17 @@
             if (!n || !e || !p) return toast('Fill all fields', 'error');
             if (p.length < 6) return toast('Password too short', 'error');
             try {
-                const r = await fetch(`${API}/api/auth/register`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name:n,email:e,password:p}) });
-                const d = await r.json();
-                if (!r.ok) throw new Error(d.error);
-                token = d.token; localStorage.setItem('token', token);
-                toast('Account created!', 'success'); showApp();
+                const r = await fetch('/api/auth/register', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name:n,email:e,password:p}) });
+                const d = await r.json(); if (!r.ok) throw new Error(d.error);
+                token = d.token; localStorage.setItem('token', token); showApp();
             } catch(x) { toast(x.message, 'error'); }
         }
 
-        // ============ APP ============
         function showApp() {
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('appScreen').classList.remove('hidden');
             document.getElementById('cmdInput').focus();
-            document.getElementById('quickGrid').innerHTML = quickItems.map(q => 
-                `<div class="q-card" onclick="quick('${q.cmd}')"><span class="q-icon">${q.icon}</span><span class="q-label">${q.text}</span></div>`
-            ).join('');
+            document.getElementById('quickGrid').innerHTML = quickItems.map(q => `<div class="q-card" onclick="quick('${q.cmd}')"><span class="q-icon">${q.icon}</span><span class="q-label">${q.text}</span></div>`).join('');
             initVoice();
         }
 
@@ -351,26 +249,20 @@
             const inp = document.getElementById('cmdInput');
             const cmd = inp.value.trim();
             if (!cmd) return;
-            
             document.getElementById('welcome')?.remove();
             addMessage(cmd, 'user');
             inp.value = '';
-            
+            stopVoice();
             const tid = showTyping();
-            
             try {
-                const r = await fetch(`${API}/api/agent`, {
-                    method:'POST',
-                    headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
-                    body:JSON.stringify({message:cmd})
-                });
+                const r = await fetch('/api/agent', { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`}, body:JSON.stringify({message:cmd}) });
                 const d = await r.json();
                 removeTyping(tid);
                 if (!r.ok) throw new Error(d.error);
-                addMessage(d.message, 'agent', d.type, d.result);
+                addMessage(d.message, 'agent', d.type, d.result || '');
             } catch(x) {
                 removeTyping(tid);
-                addMessage('Sorry, failed to process.', 'agent', 'chat');
+                addMessage('Sorry, failed to process.', 'agent', 'chat', '');
             }
         }
 
@@ -379,9 +271,9 @@
             div.className = `msg ${sender}`;
             let html = sender === 'agent' ? '<div class="msg-avatar">⚡</div>' : '';
             html += '<div class="bubble">';
-            if (type && sender === 'agent') html += `<span class="tag ${type}">${type === 'command' ? 'ACTION' : 'RESPONSE'}</span>`;
+            if (type && sender === 'agent') html += `<span class="tag ${type}">${type === 'command' ? '⚡ ACTION' : '💬 CHAT'}</span>`;
             html += escapeHTML(text);
-            if (result) html += `<span class="exec-result">✓ ${escapeHTML(result)}</span>`;
+            if (result && result !== 'Done' && result !== '') html += `<span class="exec-result">✓ ${escapeHTML(result)}</span>`;
             html += '</div>';
             if (sender === 'user') html += '<div class="msg-avatar">👤</div>';
             div.innerHTML = html;
