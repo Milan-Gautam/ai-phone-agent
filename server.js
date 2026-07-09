@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { exec } = require('child_process');
+const { exec, spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
@@ -47,210 +47,306 @@ app.post('/api/auth/login', async (req, res) => {
   } catch (e) { res.status(500).json({ error: 'Login failed' }); }
 });
 
-// ============ COMMAND PARSER ============
-function parseCommand(input) {
-  const msg = input.trim();
-  const lower = msg.toLowerCase();
-
-  // 1. SEARCH COMMANDS (check first)
-  if (lower.startsWith('search for ') || lower.startsWith('search ') || 
-      lower.startsWith('find ') || lower.startsWith('google ')) {
-    let query = lower.replace(/^(search for |search |find |google )/, '').trim();
-    return { type: 'command', action: 'search', value: query, message: 'Searching for: ' + query };
-  }
-
-  // 2. OPEN APP COMMANDS
-  const appMap = {
-    'calculator': 'gnome-calculator',
-    'calc': 'gnome-calculator',
-    'notepad': 'gedit',
-    'notes': 'gedit',
-    'terminal': 'gnome-terminal',
-    'console': 'gnome-terminal',
-    'files': 'nautilus',
-    'file manager': 'nautilus',
-    'explorer': 'nautilus',
-    'settings': 'gnome-control-center',
-    'control panel': 'gnome-control-center',
-    'firefox': 'firefox',
-    'browser': 'firefox',
-    'chrome': 'google-chrome',
-    'vscode': 'code',
-    'code': 'code',
-    'camera': 'cheese',
-    'webcam': 'cheese',
-    'system monitor': 'gnome-system-monitor',
-    'task manager': 'gnome-system-monitor'
-  };
-
-  const openAppMatch = lower.match(/^(open|launch|start|run) (.+)/);
-  if (openAppMatch) {
-    const target = openAppMatch[2];
-    for (const [name, cmd] of Object.entries(appMap)) {
-      if (target === name || target.includes(name)) {
-        return { type: 'command', action: 'app', value: cmd, message: 'Opening ' + name };
-      }
-    }
-    // If not an app, check if website
-    if (target.includes('.')) {
-      const url = target.startsWith('http') ? target : 'https://' + target;
-      return { type: 'command', action: 'open', value: url, message: 'Opening ' + target };
-    }
-    // Otherwise search
-    return { type: 'command', action: 'search', value: target, message: 'Searching for: ' + target };
-  }
-
-  // 3. WEBSITE COMMANDS
-  const siteMap = {
-    'youtube': 'https://youtube.com',
-    'facebook': 'https://facebook.com',
-    'twitter': 'https://twitter.com',
-    'instagram': 'https://instagram.com',
-    'amazon': 'https://amazon.com',
-    'github': 'https://github.com',
-    'gmail': 'https://mail.google.com',
-    'netflix': 'https://netflix.com',
-    'spotify': 'https://open.spotify.com',
-    'reddit': 'https://reddit.com',
-    'linkedin': 'https://linkedin.com',
-    'whatsapp': 'https://web.whatsapp.com',
-    'chatgpt': 'https://chat.openai.com',
-    'wikipedia': 'https://wikipedia.org'
-  };
-
-  const openSiteMatch = lower.match(/^(open|go to|visit) (.+)/);
-  if (openSiteMatch) {
-    const target = openSiteMatch[2];
-    for (const [name, url] of Object.entries(siteMap)) {
-      if (target === name || target.includes(name)) {
-        return { type: 'command', action: 'open', value: url, message: 'Opening ' + name };
-      }
-    }
-  }
-
-  // 4. SYSTEM COMMANDS - Exact matches only
-  const systemCommands = {
-    'turn on bluetooth': 'rfkill unblock bluetooth && bluetoothctl power on',
-    'turn off bluetooth': 'bluetoothctl power off',
-    'enable bluetooth': 'rfkill unblock bluetooth && bluetoothctl power on',
-    'disable bluetooth': 'bluetoothctl power off',
-    'bluetooth on': 'rfkill unblock bluetooth && bluetoothctl power on',
-    'bluetooth off': 'bluetoothctl power off',
-    'turn on wifi': 'nmcli radio wifi on',
-    'turn off wifi': 'nmcli radio wifi off',
-    'wifi on': 'nmcli radio wifi on',
-    'wifi off': 'nmcli radio wifi off',
-    'volume up': 'pactl set-sink-volume @DEFAULT_SINK@ +10%',
-    'volume down': 'pactl set-sink-volume @DEFAULT_SINK@ -10%',
-    'increase volume': 'pactl set-sink-volume @DEFAULT_SINK@ +10%',
-    'decrease volume': 'pactl set-sink-volume @DEFAULT_SINK@ -10%',
-    'mute': 'pactl set-sink-mute @DEFAULT_SINK@ 1',
-    'unmute': 'pactl set-sink-mute @DEFAULT_SINK@ 0',
-    'brightness up': 'brightnessctl set +10%',
-    'brightness down': 'brightnessctl set -10%',
-    'take screenshot': 'gnome-screenshot',
-    'screenshot': 'gnome-screenshot',
-    'lock screen': 'gnome-screensaver-command -l',
-    'lock': 'gnome-screensaver-command -l',
-    'sleep': 'systemctl suspend',
-    'dark mode': 'gsettings set org.gnome.desktop.interface gtk-theme Adwaita-dark',
-    'light mode': 'gsettings set org.gnome.desktop.interface gtk-theme Adwaita',
-    'do not disturb on': 'gsettings set org.gnome.desktop.notifications show-banners false',
-    'do not disturb off': 'gsettings set org.gnome.desktop.notifications show-banners true',
-    'battery status': 'upower -i $(upower -e | grep BAT) | grep -E "percentage|state"',
-    'disk space': 'df -h /',
-    'memory usage': 'free -h',
-    'shutdown': 'shutdown now',
-    'restart': 'reboot'
-  };
-
-  for (const [phrase, cmd] of Object.entries(systemCommands)) {
-    if (lower === phrase || lower.includes(phrase)) {
-      return { type: 'command', action: 'system', value: cmd, message: 'Executing: ' + phrase };
-    }
-  }
-
-  // 5. YOUTUBE
-  if (lower.startsWith('play ') || lower.startsWith('watch ')) {
-    const query = lower.replace(/^(play|watch) /, '');
-    return { type: 'command', action: 'open', value: 'https://youtube.com/results?search_query=' + encodeURIComponent(query), message: 'Playing: ' + query };
-  }
-
-  // 6. WEATHER
-  if (lower.startsWith('weather') || lower.includes('weather in') || lower.includes('weather for')) {
-    const loc = lower.replace(/^(weather|weather in|weather for|what is the weather|what's the weather|check weather) /, '').trim();
-    return { type: 'command', action: 'search', value: 'weather ' + (loc || 'today'), message: 'Checking weather for ' + (loc || 'today') };
-  }
-
-  // 7. TIME
-  if (lower === 'time' || lower === 'what time is it' || lower === 'what is the time' || lower === 'current time') {
-    const now = new Date();
-    return { type: 'chat', message: 'It is ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) + ' on ' + now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) };
-  }
-
-  // 8. CHAT
-  if (lower === 'hi' || lower === 'hello' || lower === 'hey' || lower === 'yo') {
-    return { type: 'chat', message: 'Hey! How can I help you?' };
-  }
-  if (lower === 'how are you' || lower === 'how are u') {
-    return { type: 'chat', message: 'I am great! Ready to help you.' };
-  }
-  if (lower === 'who are you' || lower === 'what is your name') {
-    return { type: 'chat', message: 'I am your AI Agent. I can control your system, open apps, search the web, and help you with tasks.' };
-  }
-  if (lower === 'what can you do' || lower === 'help') {
-    return { type: 'chat', message: 'I can:\n- Turn on/off Bluetooth & WiFi\n- Control volume & brightness\n- Open apps (calculator, terminal, files)\n- Open websites (YouTube, Facebook)\n- Search the web\n- Take screenshots\n- Lock screen\n- And chat with you!' };
-  }
-  if (lower.includes('thank')) {
-    return { type: 'chat', message: 'You are welcome!' };
-  }
-  if (lower === 'bye' || lower === 'goodbye') {
-    return { type: 'chat', message: 'Goodbye! Have a great day!' };
-  }
-  if (lower.includes('joke')) {
-    return { type: 'chat', message: 'Why do programmers prefer dark mode? Because light attracts bugs! 😄' };
-  }
-
-  // 9. DEFAULT - Ask user to clarify
-  return { type: 'chat', message: 'I am not sure what you want. Try:\n- "Open calculator"\n- "Search for cats"\n- "Turn on Bluetooth"\n- "What time is it?"\n- "Help"' };
-}
-
-function executeCommand(action, value) {
+// ============ LIST ALL INSTALLED APPS ============
+function listInstalledApps() {
   return new Promise((resolve) => {
-    if (!action) return resolve('');
-    let cmd = '';
-    if (action === 'open') cmd = 'xdg-open "' + value + '"';
-    else if (action === 'search') cmd = 'xdg-open "https://www.google.com/search?q=' + encodeURIComponent(value) + '"';
-    else if (action === 'app') cmd = value;
-    else if (action === 'system') cmd = value;
-    exec(cmd, { timeout: 15000 }, (err, stdout, stderr) => {
-      if (err) return resolve(stderr?.trim() || err.message);
-      resolve(stdout?.trim() || 'Done');
+    exec('ls /usr/share/applications/*.desktop 2>/dev/null | head -50', (err, stdout) => {
+      if (err) return resolve([]);
+      const apps = stdout.trim().split('\n').map(f => {
+        const name = path.basename(f, '.desktop');
+        return { name: name, file: f };
+      });
+      resolve(apps);
     });
   });
 }
 
+// ============ OPEN ANY APP BY NAME ============
+function openApp(appName) {
+  return new Promise((resolve) => {
+    const lower = appName.toLowerCase();
+    
+    // Common apps mapping
+    const commonApps = {
+      'calculator': 'gnome-calculator',
+      'calc': 'gnome-calculator',
+      'notepad': 'gedit',
+      'notes': 'gedit',
+      'editor': 'gedit',
+      'text editor': 'gedit',
+      'terminal': 'gnome-terminal',
+      'console': 'gnome-terminal',
+      'bash': 'gnome-terminal',
+      'shell': 'gnome-terminal',
+      'files': 'nautilus',
+      'file manager': 'nautilus',
+      'explorer': 'nautilus',
+      'folders': 'nautilus',
+      'settings': 'gnome-control-center',
+      'control panel': 'gnome-control-center',
+      'preferences': 'gnome-control-center',
+      'firefox': 'firefox',
+      'browser': 'firefox',
+      'web': 'firefox',
+      'chrome': 'google-chrome',
+      'google chrome': 'google-chrome',
+      'vscode': 'code',
+      'code': 'code',
+      'visual studio': 'code',
+      'camera': 'cheese',
+      'webcam': 'cheese',
+      'system monitor': 'gnome-system-monitor',
+      'task manager': 'gnome-system-monitor',
+      'software': 'gnome-software',
+      'app store': 'gnome-software',
+      'calendar': 'gnome-calendar',
+      'clock': 'gnome-clocks',
+      'weather': 'gnome-weather',
+      'maps': 'gnome-maps',
+      'photos': 'eog',
+      'images': 'eog',
+      'pictures': 'eog',
+      'videos': 'totem',
+      'movies': 'totem',
+      'music': 'rhythmbox',
+      'audio': 'rhythmbox',
+      'documents': 'evince',
+      'pdf': 'evince',
+      'disk usage': 'baobab',
+      'disks': 'gnome-disks',
+      'network': 'gnome-control-center network',
+      'wifi': 'gnome-control-center wifi',
+      'bluetooth': 'gnome-control-center bluetooth',
+      'display': 'gnome-control-center display',
+      'sound': 'gnome-control-center sound',
+      'power': 'gnome-control-center power',
+      'printers': 'gnome-control-center printers',
+      'users': 'gnome-control-center user-accounts',
+      'background': 'gnome-control-center background',
+      'appearance': 'gnome-control-center appearance',
+      'notifications': 'gnome-control-center notifications',
+      'privacy': 'gnome-control-center privacy',
+      'sharing': 'gnome-control-center sharing',
+      'mouse': 'gnome-control-center mouse',
+      'keyboard': 'gnome-control-center keyboard',
+      'screenshot': 'gnome-screenshot --interactive',
+      'screen recorder': 'gnome-screen-recorder',
+      'color': 'gnome-control-center color',
+      'date': 'gnome-control-center datetime',
+      'region': 'gnome-control-center region',
+      'accessibility': 'gnome-control-center universal-access',
+      'online accounts': 'gnome-control-center online-accounts',
+      'thunderbird': 'thunderbird',
+      'mail': 'thunderbird',
+      'email': 'thunderbird',
+      'libreoffice': 'libreoffice',
+      'office': 'libreoffice',
+      'word': 'libreoffice --writer',
+      'excel': 'libreoffice --calc',
+      'powerpoint': 'libreoffice --impress',
+      'gimp': 'gimp',
+      'photoshop': 'gimp',
+      'vlc': 'vlc',
+      'media player': 'vlc',
+      'steam': 'steam',
+      'discord': 'discord',
+      'spotify': 'spotify',
+      'slack': 'slack',
+      'telegram': 'telegram-desktop',
+      'whatsapp': 'whatsapp-desktop',
+      'zoom': 'zoom',
+      'skype': 'skype',
+      'teams': 'teams',
+      'postman': 'postman',
+      'docker': 'docker-desktop',
+      'virtualbox': 'virtualbox',
+      'gitkraken': 'gitkraken',
+      'sublime': 'sublime_text',
+      'atom': 'atom',
+      'intellij': 'intellij-idea-community',
+      'pycharm': 'pycharm-community',
+      'eclipse': 'eclipse',
+      'netbeans': 'netbeans',
+      'android studio': 'android-studio',
+      'filezilla': 'filezilla',
+      'transmission': 'transmission-gtk',
+      'torrent': 'transmission-gtk',
+      'bitwarden': 'bitwarden',
+      'keepass': 'keepassxc',
+      'password manager': 'keepassxc',
+      'obs': 'obs',
+      'kdenlive': 'kdenlive',
+      'audacity': 'audacity',
+      'inkscape': 'inkscape',
+      'blender': 'blender',
+      'krita': 'krita',
+    };
+
+    const cmd = commonApps[lower] || appName;
+    
+    exec(cmd + ' &', (err) => {
+      if (err) {
+        // Try desktop file
+        exec('gtk-launch ' + appName + ' &', (err2) => {
+          resolve(err2 ? 'Could not open ' + appName : 'Opened ' + appName);
+        });
+      } else {
+        resolve('Opened ' + appName);
+      }
+    });
+  });
+}
+
+// ============ SYSTEM CONTROL ============
+function systemControl(command) {
+  return new Promise((resolve) => {
+    const commands = {
+      'volume up': 'pactl set-sink-volume @DEFAULT_SINK@ +10%',
+      'volume down': 'pactl set-sink-volume @DEFAULT_SINK@ -10%',
+      'volume max': 'pactl set-sink-volume @DEFAULT_SINK@ 100%',
+      'mute': 'pactl set-sink-mute @DEFAULT_SINK@ toggle',
+      'brightness up': 'brightnessctl set +10%',
+      'brightness down': 'brightnessctl set -10%',
+      'bluetooth on': 'rfkill unblock bluetooth && bluetoothctl power on',
+      'bluetooth off': 'bluetoothctl power off',
+      'wifi on': 'nmcli radio wifi on',
+      'wifi off': 'nmcli radio wifi off',
+      'screenshot': 'gnome-screenshot',
+      'lock': 'gnome-screensaver-command -l',
+      'sleep': 'systemctl suspend',
+      'dark mode': 'gsettings set org.gnome.desktop.interface gtk-theme Adwaita-dark',
+      'light mode': 'gsettings set org.gnome.desktop.interface gtk-theme Adwaita',
+      'dnd on': 'gsettings set org.gnome.desktop.notifications show-banners false',
+      'dnd off': 'gsettings set org.gnome.desktop.notifications show-banners true',
+      'shutdown': 'shutdown now',
+      'restart': 'reboot',
+    };
+
+    const cmd = commands[command];
+    if (cmd) {
+      exec(cmd, (err, stdout) => resolve(err ? err.message : (stdout || 'Done')));
+    } else {
+      resolve('Unknown command');
+    }
+  });
+}
+
+// ============ SMART AI RESPONSE ============
+function getAIResponse(msg) {
+  const lower = msg.toLowerCase().trim();
+
+  // ========== OPEN APPS ==========
+  if (lower.startsWith('open ') || lower.startsWith('launch ') || lower.startsWith('start ') || lower.startsWith('run ')) {
+    const app = lower.replace(/^(open|launch|start|run)\s+/i, '');
+    return { type: 'app', action: app, message: 'Opening ' + app };
+  }
+
+  // ========== SYSTEM CONTROLS ==========
+  const systemTriggers = {
+    'volume up': 'volume up', 'volume down': 'volume down', 'volume max': 'volume max',
+    'mute': 'mute', 'unmute': 'mute',
+    'brightness up': 'brightness up', 'brightness down': 'brightness down',
+    'bluetooth on': 'bluetooth on', 'bluetooth off': 'bluetooth off',
+    'wifi on': 'wifi on', 'wifi off': 'wifi off',
+    'take screenshot': 'screenshot', 'screenshot': 'screenshot',
+    'lock screen': 'lock', 'lock': 'lock',
+    'sleep': 'sleep', 'suspend': 'sleep',
+    'dark mode': 'dark mode', 'night mode': 'dark mode',
+    'light mode': 'light mode', 'day mode': 'light mode',
+    'do not disturb on': 'dnd on', 'do not disturb off': 'dnd off',
+    'shutdown': 'shutdown', 'power off': 'shutdown',
+    'restart': 'restart', 'reboot': 'restart',
+  };
+
+  for (const [trigger, cmd] of Object.entries(systemTriggers)) {
+    if (lower.includes(trigger)) {
+      return { type: 'system', action: cmd, message: 'Executing: ' + trigger };
+    }
+  }
+
+  // ========== SEARCH ==========
+  if (lower.startsWith('search ') || lower.startsWith('find ') || lower.startsWith('google ')) {
+    const query = lower.replace(/^(search|find|google)\s+(for\s+)?/i, '');
+    return { type: 'search', action: query, message: 'Searching for: ' + query };
+  }
+
+  // ========== WEBSITES ==========
+  const sites = {
+    'youtube': 'https://youtube.com', 'facebook': 'https://facebook.com',
+    'twitter': 'https://twitter.com', 'instagram': 'https://instagram.com',
+    'amazon': 'https://amazon.com', 'github': 'https://github.com',
+    'gmail': 'https://mail.google.com', 'netflix': 'https://netflix.com',
+    'spotify': 'https://open.spotify.com', 'reddit': 'https://reddit.com',
+    'linkedin': 'https://linkedin.com', 'chatgpt': 'https://chat.openai.com',
+  };
+
+  for (const [name, url] of Object.entries(sites)) {
+    if (lower.includes(name) && (lower.startsWith('open') || lower.startsWith('go to'))) {
+      return { type: 'website', action: url, message: 'Opening ' + name };
+    }
+  }
+
+  // ========== WEATHER ==========
+  if (lower.includes('weather') || lower.includes('forecast')) {
+    const loc = lower.replace(/weather|forecast|what'?s?\s+the\s+weather|check\s+weather/gi, '').replace(/\s+(in|for|at)\s+/gi, '').trim();
+    return { type: 'search', action: 'weather ' + (loc || 'today'), message: 'Checking weather' + (loc ? ' for ' + loc : '') };
+  }
+
+  // ========== TIME ==========
+  if (lower.includes('time') || lower.includes('clock') || lower.includes('date')) {
+    const now = new Date();
+    return { type: 'chat', message: 'It is ' + now.toLocaleTimeString() + ' on ' + now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) };
+  }
+
+  // ========== CHAT ==========
+  if (/^(hi|hello|hey|yo|sup)\b/i.test(lower)) return { type: 'chat', message: 'Hey! What can I do for you?' };
+  if (/how\s+are\s+you/i.test(lower)) return { type: 'chat', message: 'I am running perfectly! Ready to help.' };
+  if (/who\s+are\s+you|your\s+name/i.test(lower)) return { type: 'chat', message: 'I am your AI Agent. I can open ANY app on your device, control system settings, search the web, and chat with you.' };
+  if (/what\s+can\s+you\s+do|help/i.test(lower)) return { type: 'chat', message: 'I can:\n• Open ANY app - "Open calculator", "Open chrome", "Open vscode"\n• Control system - "Volume up", "Turn on Bluetooth"\n• Search web - "Search for cats"\n• Open websites - "Open YouTube"\n• Tell time & weather\n• Chat with you!' };
+  if (/thank/i.test(lower)) return { type: 'chat', message: 'You\'re welcome! 😊' };
+  if (/bye|goodbye/i.test(lower)) return { type: 'chat', message: 'Goodbye! Have a great day!' };
+  if (/joke/i.test(lower)) return { type: 'chat', message: 'Why do programmers prefer dark mode? Because light attracts bugs! 😄' };
+  if (/love you/i.test(lower)) return { type: 'chat', message: 'Thank you! ❤️' };
+  if (/how old/i.test(lower)) return { type: 'chat', message: 'I was just created! Still learning new things every day.' };
+  if (/your creator|who made you/i.test(lower)) return { type: 'chat', message: 'I was created by a developer who wanted a smart device assistant!' };
+
+  // Default
+  return { type: 'chat', message: 'I can help with:\n• "Open [app name]" - Opens any app\n• "Volume up/down" - Control audio\n• "Search for [query]" - Web search\n• "Turn on Bluetooth" - System controls\n• "What time is it?" - Time & info\n\nWhat would you like?' };
+}
+
+// ============ MAIN AGENT ============
 app.post('/api/agent', auth, async (req, res) => {
   try {
     const { message } = req.body;
     if (!message) return res.status(400).json({ error: 'Message required' });
     
-    console.log('Input:', message);
-    const result = parseCommand(message);
-    console.log('Result:', result.type, '-', result.message);
-    
+    const result = getAIResponse(message);
     let execResult = '';
-    if (result.type === 'command' && result.action) {
-      execResult = await executeCommand(result.action, result.value);
+    
+    if (result.type === 'app') {
+      execResult = await openApp(result.action);
+    } else if (result.type === 'system') {
+      execResult = await systemControl(result.action);
+    } else if (result.type === 'search') {
+      const url = 'https://www.google.com/search?q=' + encodeURIComponent(result.action);
+      exec('xdg-open "' + url + '"');
+      execResult = 'Opened search results';
+    } else if (result.type === 'website') {
+      exec('xdg-open "' + result.action + '"');
+      execResult = 'Opened website';
     }
     
     res.json({ success: true, type: result.type, message: result.message, result: execResult || '' });
   } catch (e) {
-    console.error('Error:', e);
     res.status(500).json({ error: 'Failed' });
   }
 });
 
+app.get('/api/apps', auth, async (req, res) => {
+  const apps = await listInstalledApps();
+  res.json({ apps });
+});
+
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
-app.listen(PORT, () => console.log('Server: http://localhost:' + PORT));
+app.listen(PORT, () => console.log('\n⚡ AI Agent: http://localhost:' + PORT + '\n'));
