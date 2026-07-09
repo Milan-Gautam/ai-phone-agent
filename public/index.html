@@ -9,19 +9,16 @@
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
         .hidden{display:none!important}
-        ::-webkit-scrollbar{width:5px}
-        ::-webkit-scrollbar-track{background:transparent}
-        ::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px}
         .screen{height:100vh;display:flex;align-items:center;justify-content:center}
         .auth-card{background:var(--surface);padding:40px;border-radius:16px;width:400px;border:1px solid var(--border)}
         .auth-card .logo{font-size:50px;text-align:center;margin-bottom:15px}
-        .auth-card h2{text-align:center;margin-bottom:5px;font-size:22px}
+        .auth-card h2{text-align:center;margin-bottom:5px}
         .auth-card .sub{text-align:center;color:var(--text2);font-size:13px;margin-bottom:30px}
         .field{margin-bottom:15px}
-        .field label{display:block;font-size:11px;color:var(--text2);text-transform:uppercase;margin-bottom:5px;font-weight:600;letter-spacing:0.5px}
+        .field label{display:block;font-size:11px;color:var(--text2);text-transform:uppercase;margin-bottom:5px;font-weight:600}
         .field input{width:100%;padding:13px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none}
         .field input:focus{border-color:var(--accent)}
-        .btn{width:100%;padding:13px;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;background:var(--accent);color:white;margin-top:5px}
+        .btn{width:100%;padding:13px;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;background:var(--accent);color:white}
         .btn:hover{opacity:0.9}
         .auth-link{text-align:center;margin-top:20px;font-size:13px;color:var(--text2)}
         .auth-link a{color:var(--accent);cursor:pointer}
@@ -29,44 +26,35 @@
         header{padding:14px 20px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
         .brand{display:flex;align-items:center;gap:10px}
         .brand .avatar{font-size:26px}
-        .brand h3{font-size:14px;font-weight:600}
+        .brand h3{font-size:14px}
         .brand .dot{color:var(--success);font-size:11px}
-        header button{padding:8px 16px;background:transparent;border:1px solid var(--border);color:var(--text);border-radius:8px;cursor:pointer;font-size:13px}
-        header button:hover{background:var(--border)}
+        header button{padding:8px 16px;background:transparent;border:1px solid var(--border);color:var(--text);border-radius:8px;cursor:pointer}
         main{flex:1;overflow-y:auto;padding:20px}
         .welcome{text-align:center;margin-top:50px}
         .welcome .w-icon{font-size:60px;margin-bottom:15px}
         .welcome h2{font-size:22px;margin-bottom:5px}
-        .welcome p{color:var(--text2);font-size:14px;margin-bottom:20px}
+        .welcome p{color:var(--text2);margin-bottom:20px}
         .quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:480px;margin:0 auto}
-        .q-card{padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;cursor:pointer;font-size:14px;transition:all 0.2s}
-        .q-card:hover{border-color:var(--accent);background:#1a1a24}
+        .q-card{padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;cursor:pointer;font-size:14px}
+        .q-card:hover{border-color:var(--accent)}
         .msg{display:flex;margin-bottom:16px;animation:fadeIn 0.3s}
         @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
         .msg.user{justify-content:flex-end}
         .bubble{max-width:75%;padding:12px 16px;border-radius:16px;font-size:14px;line-height:1.5;white-space:pre-wrap}
         .user .bubble{background:var(--accent);border-bottom-right-radius:4px}
         .agent .bubble{background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:4px}
-        .tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;margin-bottom:6px;letter-spacing:0.5px}
+        .tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;margin-bottom:6px}
         .tag.command{background:rgba(99,102,241,0.15);color:#a5b4fc}
         .tag.chat{background:rgba(16,185,129,0.15);color:#6ee7b7}
         .result-text{display:block;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:12px;color:var(--success)}
-        .typing-dots{display:flex;gap:4px;padding:4px 0}
-        .typing-dots span{width:6px;height:6px;background:var(--text2);border-radius:50%;animation:bounce 1.4s infinite}
-        .typing-dots span:nth-child(2){animation-delay:0.2s}
-        .typing-dots span:nth-child(3){animation-delay:0.4s}
-        @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
         footer{padding:14px 20px;background:var(--surface);border-top:1px solid var(--border);display:flex;gap:10px;align-items:center}
         #cmdInput{flex:1;padding:12px 18px;background:var(--bg);border:1.5px solid var(--border);border-radius:25px;color:var(--text);font-size:14px;outline:none}
         #cmdInput:focus{border-color:var(--accent)}
         #cmdInput::placeholder{color:#555}
-        .circle-btn{width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s}
+        .circle-btn{width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
         #voiceBtn{background:transparent;border:1.5px solid var(--border);color:var(--text2)}
-        #voiceBtn:hover{border-color:var(--accent)}
-        #voiceBtn.active{background:var(--danger);border-color:var(--danger);color:white;animation:pulse 2s infinite}
-        @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,0.4)}70%{box-shadow:0 0 0 12px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
+        #voiceBtn.active{background:var(--danger);border-color:var(--danger);color:white}
         #sendBtn{background:var(--accent);color:white}
-        #sendBtn:hover{opacity:0.9}
     </style>
 </head>
 <body>
@@ -76,7 +64,7 @@
             <h2>AI Agent</h2>
             <p class="sub">Your intelligent assistant</p>
             <div id="loginForm">
-                <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="you@email.com" autocomplete="email"></div>
+                <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="you@email.com"></div>
                 <div class="field"><label>Password</label><input type="password" id="loginPassword" placeholder="Your password"></div>
                 <button class="btn" onclick="login()">Sign In</button>
                 <p class="auth-link">No account? <a onclick="showRegister()">Create one</a></p>
@@ -93,17 +81,14 @@
 
     <div id="appScreen" class="hidden">
         <header>
-            <div class="brand">
-                <span class="avatar">⚡</span>
-                <div><h3>AI Agent</h3><span class="dot">● Online</span></div>
-            </div>
+            <div class="brand"><span class="avatar">⚡</span><div><h3>AI Agent</h3><span class="dot">● Online</span></div></div>
             <button onclick="logout()">Logout</button>
         </header>
         <main id="messages">
             <div class="welcome" id="welcome">
                 <div class="w-icon">⚡</div>
                 <h2>How can I help you?</h2>
-                <p>Type a command or click 🎤 to speak</p>
+                <p>Type a command or click 🎤</p>
                 <div class="quick-grid" id="quickGrid"></div>
             </div>
         </main>
@@ -119,194 +104,97 @@
         var recognition = null;
 
         var quickItems = [
-            { icon: '📺', text: 'Open YouTube', cmd: 'Open YouTube' },
-            { icon: '🔍', text: 'Search cats', cmd: 'Search for cats' },
-            { icon: '🌤️', text: 'Weather London', cmd: 'Weather in London' },
-            { icon: '😄', text: 'Tell a joke', cmd: 'Tell me a joke' },
-            { icon: '⏰', text: 'What time is it?', cmd: 'What time is it?' },
-            { icon: '🧮', text: 'Open Calculator', cmd: 'Open calculator' },
-            { icon: '💻', text: 'Open GitHub', cmd: 'Open GitHub' },
-            { icon: '💬', text: 'Say Hello', cmd: 'Hello' }
+            { icon:'🧮',text:'Open Calculator',cmd:'Open calculator' },
+            { icon:'📁',text:'Open Files',cmd:'Open files' },
+            { icon:'💻',text:'Open Terminal',cmd:'Open terminal' },
+            { icon:'🔊',text:'Volume Up',cmd:'Volume up' },
+            { icon:'📸',text:'Screenshot',cmd:'Take screenshot' },
+            { icon:'🔍',text:'Search cats',cmd:'Search for cats' },
+            { icon:'📺',text:'Open YouTube',cmd:'Open YouTube' },
+            { icon:'💬',text:'Say Hello',cmd:'Hello' }
         ];
 
-        function showRegister() {
-            document.getElementById('loginForm').classList.add('hidden');
-            document.getElementById('registerForm').classList.remove('hidden');
-        }
-        function showLogin() {
-            document.getElementById('registerForm').classList.add('hidden');
-            document.getElementById('loginForm').classList.remove('hidden');
+        function showRegister(){document.getElementById('loginForm').classList.add('hidden');document.getElementById('registerForm').classList.remove('hidden')}
+        function showLogin(){document.getElementById('registerForm').classList.add('hidden');document.getElementById('loginForm').classList.remove('hidden')}
+
+        async function login(){
+            var e=document.getElementById('loginEmail').value.trim(),p=document.getElementById('loginPassword').value;
+            if(!e||!p)return alert('Fill all fields');
+            try{
+                var r=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:e,password:p})});
+                var d=await r.json();if(!r.ok)throw new Error(d.error);
+                token=d.token;localStorage.setItem('token',token);showApp();
+            }catch(x){alert(x.message)}
         }
 
-        async function login() {
-            var email = document.getElementById('loginEmail').value.trim();
-            var password = document.getElementById('loginPassword').value;
-            if (!email || !password) return alert('Fill all fields');
-            try {
-                var r = await fetch('/api/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email:email,password:password}) });
-                var d = await r.json();
-                if (!r.ok) throw new Error(d.error || 'Login failed');
-                token = d.token;
-                localStorage.setItem('token', token);
-                showApp();
-            } catch(e) { alert(e.message); }
+        async function register(){
+            var n=document.getElementById('regName').value.trim(),e=document.getElementById('regEmail').value.trim(),p=document.getElementById('regPassword').value;
+            if(!n||!e||!p)return alert('Fill all fields');
+            if(p.length<6)return alert('Password too short');
+            try{
+                var r=await fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,email:e,password:p})});
+                var d=await r.json();if(!r.ok)throw new Error(d.error);
+                token=d.token;localStorage.setItem('token',token);showApp();
+            }catch(x){alert(x.message)}
         }
 
-        async function register() {
-            var name = document.getElementById('regName').value.trim();
-            var email = document.getElementById('regEmail').value.trim();
-            var password = document.getElementById('regPassword').value;
-            if (!name || !email || !password) return alert('Fill all fields');
-            if (password.length < 6) return alert('Password too short');
-            try {
-                var r = await fetch('/api/auth/register', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name:name,email:email,password:password}) });
-                var d = await r.json();
-                if (!r.ok) throw new Error(d.error || 'Registration failed');
-                token = d.token;
-                localStorage.setItem('token', token);
-                showApp();
-            } catch(e) { alert(e.message); }
-        }
-
-        function showApp() {
+        function showApp(){
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('appScreen').classList.remove('hidden');
-            
-            var grid = document.getElementById('quickGrid');
-            grid.innerHTML = '';
-            quickItems.forEach(function(item) {
-                var card = document.createElement('div');
-                card.className = 'q-card';
-                card.textContent = item.icon + ' ' + item.text;
-                card.onclick = function() {
-                    document.getElementById('cmdInput').value = item.cmd;
-                    sendMsg();
-                };
-                grid.appendChild(card);
+            var g=document.getElementById('quickGrid');g.innerHTML='';
+            quickItems.forEach(function(i){
+                var c=document.createElement('div');c.className='q-card';
+                c.textContent=i.icon+' '+i.text;
+                c.onclick=function(){document.getElementById('cmdInput').value=i.cmd;sendMsg()};
+                g.appendChild(c);
             });
-            
-            setupVoice();
-            document.getElementById('cmdInput').focus();
+            setupVoice();document.getElementById('cmdInput').focus();
         }
 
-        function logout() { localStorage.clear(); location.reload(); }
+        function logout(){localStorage.clear();location.reload()}
 
-        // VOICE SETUP
-        function setupVoice() {
-            try {
-                var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-                if (!SR) { document.getElementById('voiceBtn').style.display = 'none'; return; }
-                recognition = new SR();
-                recognition.lang = 'en-US';
-                recognition.interimResults = false;
-                recognition.maxAlternatives = 1;
-                
-                recognition.onstart = function() {
-                    document.getElementById('voiceBtn').classList.add('active');
-                    document.getElementById('cmdInput').placeholder = '🎤 Listening...';
-                    document.getElementById('cmdInput').value = '';
-                };
-                
-                recognition.onresult = function(event) {
-                    var text = event.results[0][0].transcript;
-                    document.getElementById('cmdInput').value = text;
-                    document.getElementById('voiceBtn').classList.remove('active');
-                    document.getElementById('cmdInput').placeholder = 'Type here...';
-                    if (text.trim()) sendMsg();
-                };
-                
-                recognition.onerror = function(event) {
-                    document.getElementById('voiceBtn').classList.remove('active');
-                    document.getElementById('cmdInput').placeholder = 'Type here...';
-                    if (event.error === 'not-allowed') alert('Microphone access denied! Please allow microphone in browser settings.');
-                };
-                
-                recognition.onend = function() {
-                    document.getElementById('voiceBtn').classList.remove('active');
-                    document.getElementById('cmdInput').placeholder = 'Type here...';
-                };
-            } catch(e) { document.getElementById('voiceBtn').style.display = 'none'; }
+        function setupVoice(){
+            var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+            if(!SR){document.getElementById('voiceBtn').style.display='none';return}
+            recognition=new SR();recognition.lang='en-US';recognition.interimResults=false;
+            recognition.onstart=function(){document.getElementById('voiceBtn').classList.add('active');document.getElementById('cmdInput').placeholder='Listening...'}
+            recognition.onresult=function(e){var t=e.results[0][0].transcript;document.getElementById('cmdInput').value=t;if(t.trim())sendMsg()}
+            recognition.onerror=function(){document.getElementById('voiceBtn').classList.remove('active')}
+            recognition.onend=function(){document.getElementById('voiceBtn').classList.remove('active');document.getElementById('cmdInput').placeholder='Type here...'}
         }
 
-        function toggleVoice() {
-            if (!recognition) { alert('Voice requires Chrome or Edge browser.'); return; }
-            if (document.getElementById('voiceBtn').classList.contains('active')) {
-                try { recognition.stop(); } catch(e) {}
-            } else {
-                try { recognition.start(); } catch(e) {}
-            }
+        function toggleVoice(){
+            if(!recognition){alert('Use Chrome for voice');return}
+            if(document.getElementById('voiceBtn').classList.contains('active')){try{recognition.stop()}catch(e){}}
+            else{try{recognition.start()}catch(e){}}
         }
 
-        async function sendMsg() {
-            var input = document.getElementById('cmdInput');
-            var cmd = input.value.trim();
-            if (!cmd) return;
-            
-            var welcome = document.getElementById('welcome');
-            if (welcome) welcome.remove();
-            
-            addMessage(cmd, 'user');
-            input.value = '';
-            
-            var typingId = showTyping();
-            
-            try {
-                var r = await fetch('/api/agent', {
-                    method: 'POST',
-                    headers: { 'Content-Type':'application/json', 'Authorization':'Bearer ' + token },
-                    body: JSON.stringify({ message: cmd })
-                });
-                
-                if (r.status === 401) {
-                    removeTyping(typingId);
-                    alert('Session expired. Please login again.');
-                    logout();
-                    return;
-                }
-                
-                var d = await r.json();
-                removeTyping(typingId);
-                if (!r.ok) throw new Error(d.error);
-                addMessage(d.message, 'agent', d.type, d.result || '');
-            } catch(e) {
-                removeTyping(typingId);
-                addMessage('Error: ' + (e.message || 'Something went wrong'), 'agent');
-            }
+        async function sendMsg(){
+            var inp=document.getElementById('cmdInput'),cmd=inp.value.trim();
+            if(!cmd)return;
+            var w=document.getElementById('welcome');if(w)w.remove();
+            addMsg(cmd,'user');inp.value='';
+            try{
+                var r=await fetch('/api/agent',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({message:cmd})});
+                if(r.status===401){alert('Session expired. Login again.');logout();return}
+                var d=await r.json();if(!r.ok)throw new Error(d.error);
+                addMsg(d.message,'agent',d.type,d.result||'');
+            }catch(e){addMsg('Error: '+e.message,'agent')}
         }
 
-        function addMessage(text, sender, type, result) {
-            var div = document.createElement('div');
-            div.className = 'msg ' + sender;
-            var html = '<div class="bubble">';
-            if (type && sender === 'agent') html += '<span class="tag ' + type + '">' + (type === 'command' ? 'ACTION' : 'CHAT') + '</span>';
-            html += text.replace(/\n/g, '<br>');
-            if (result && result !== '' && result !== 'Done') html += '<span class="result-text">' + result + '</span>';
-            html += '</div>';
-            div.innerHTML = html;
+        function addMsg(text,sender,type,result){
+            var div=document.createElement('div');div.className='msg '+sender;
+            var h='<div class="bubble">';
+            if(type&&sender==='agent')h+='<span class="tag '+(type==='chat'?'chat':'command')+'">'+(type==='chat'?'CHAT':'ACTION')+'</span>';
+            h+=text.replace(/\n/g,'<br>');
+            if(result&&result!=='Done'&&result!=='')h+='<span class="result-text">'+result+'</span>';
+            h+='</div>';div.innerHTML=h;
             document.getElementById('messages').appendChild(div);
-            div.scrollIntoView({ behavior: 'smooth' });
+            div.scrollIntoView({behavior:'smooth'});
         }
 
-        function showTyping() {
-            var id = 'typing-' + Date.now();
-            var div = document.createElement('div');
-            div.className = 'msg agent';
-            div.id = id;
-            div.innerHTML = '<div class="bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>';
-            document.getElementById('messages').appendChild(div);
-            return id;
-        }
-
-        function removeTyping(id) { var el = document.getElementById(id); if (el) el.remove(); }
-
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && document.activeElement === document.getElementById('cmdInput')) {
-                e.preventDefault();
-                sendMsg();
-            }
-        });
-
-        if (token) showApp();
+        document.addEventListener('keydown',function(e){if(e.key==='Enter'&&document.activeElement===document.getElementById('cmdInput')){e.preventDefault();sendMsg()}});
+        if(token)showApp();
     </script>
 </body>
 </html>
