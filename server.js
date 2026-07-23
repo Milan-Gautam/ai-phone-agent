@@ -10,15 +10,70 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET;
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const DATA_DIR = path.join(__dirname, 'data');
 
 if (!JWT_SECRET) {
   console.error('Missing JWT_SECRET in .env — refusing to start.');
   process.exit(1);
 }
-if (!ANTHROPIC_API_KEY) {
-  console.warn('Warning: ANTHROPIC_API_KEY not set — AI chat replies will fail until you add it to .env');
+
+// ---------- Multi-provider AI config ----------
+// Tried in this order; first configured+working provider wins.
+const PROVIDERS = [
+  {
+    name: 'groq',
+    key: process.env.GROQ_API_KEY,
+    model: 'llama-3.3-70b-versatile',
+    build: (key, model, system, messages) => ({
+      url: 'https://api.groq.com/openai/v1/chat/completions',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+      body: { model, messages: [{ role: 'system', content: system }, ...messages] }
+    }),
+    extract: (data) => data.choices?.[0]?.message?.content
+  },
+  {
+    name: 'gemini',
+    key: process.env.GEMINI_API_KEY,
+    model: 'gemini-2.0-flash',
+    build: (key, model, system, messages) => ({
+      url: `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+      headers: { 'Content-Type': 'application/json' },
+      body: {
+        systemInstruction: { parts: [{ text: system }] },
+        contents: messages.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }))
+      }
+    }),
+    extract: (data) => data.candidates?.[0]?.content?.parts?.map(p => p.text).join('')
+  },
+  {
+    name: 'deepseek',
+    key: process.env.DEEPSEEK_API_KEY,
+    model: 'deepseek-chat',
+    build: (key, model, system, messages) => ({
+      url: 'https://api.deepseek.com/chat/completions',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+      body: { model, messages: [{ role: 'system', content: system }, ...messages] }
+    }),
+    extract: (data) => data.choices?.[0]?.message?.content
+  },
+  {
+    name: 'together',
+    key: process.env.TOGETHER_API_KEY,
+    model: 'meta-llama/Llama-3.3-70B-Instruct-Turbo',
+    build: (key, model, system, messages) => ({
+      url: 'https://api.together.xyz/v1/chat/completions',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+      body: { model, messages: [{ role: 'system', content: system }, ...messages] }
+    }),
+    extract: (data) => data.choices?.[0]?.message?.content
+  }
+];
+
+const configured = PROVIDERS.filter(p => p.key);
+if (configured.length === 0) {
+  console.warn('Warning: no AI provider keys set in .env — AI chat replies will fail until you add at least one.');
+} else {
+  console.log('AI providers active (in fallback order): ' + configured.map(p => p.name).join(' -> '));
 }
 
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
@@ -105,42 +160,40 @@ function runCmd(cmd) {
 const chatHistory = new Map(); // userId -> [{role, content}, ...]
 const MAX_HISTORY_MESSAGES = 12; // trim so requests stay cheap/fast
 
+const SYSTEM_PROMPT = 'You are a helpful assistant embedded in a desktop app. Keep answers concise and conversational unless the user asks for depth or detail.';
+
+async function callProvider(provider, system, messages) {
+  const { url, headers, body } = provider.build(provider.key, provider.model, system, messages);
+  const response = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error?.message || data.error || `HTTP ${response.status}`);
+  const text = provider.extract(data);
+  if (!text) throw new Error('empty response');
+  return text.trim();
+}
+
 async function getAIReply(userId, message) {
-  if (!ANTHROPIC_API_KEY) {
-    return "AI isn't configured yet — add ANTHROPIC_API_KEY to your .env file and restart the server.";
+  if (configured.length === 0) {
+    return "AI isn't configured yet — add at least one provider key (GROQ_API_KEY, GEMINI_API_KEY, DEEPSEEK_API_KEY, or TOGETHER_API_KEY) to your .env file and restart the server.";
   }
 
   const history = chatHistory.get(userId) || [];
   const messages = [...history, { role: 'user', content: message }];
 
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1024,
-        system: 'You are a helpful assistant embedded in a desktop app. Keep answers concise and conversational unless the user asks for depth or detail.',
-        messages
-      })
-    });
-
-    const data = await response.json();
-    if (data.error) return 'AI error: ' + data.error.message;
-
-    const replyText = (data.content || []).map(b => b.text || '').join('').trim() || '(no response)';
-
-    const updated = [...messages, { role: 'assistant', content: replyText }].slice(-MAX_HISTORY_MESSAGES);
-    chatHistory.set(userId, updated);
-
-    return replyText;
-  } catch (e) {
-    return 'AI request failed: ' + e.message;
+  const errors = [];
+  for (const provider of configured) {
+    try {
+      const replyText = await callProvider(provider, SYSTEM_PROMPT, messages);
+      const updated = [...messages, { role: 'assistant', content: replyText }].slice(-MAX_HISTORY_MESSAGES);
+      chatHistory.set(userId, updated);
+      return replyText;
+    } catch (e) {
+      errors.push(`${provider.name}: ${e.message}`);
+      console.warn(`AI provider ${provider.name} failed, trying next —`, e.message);
+    }
   }
+
+  return 'All AI providers failed. (' + errors.join(' | ') + ')';
 }
 
 // ---------- Command parsing ----------
