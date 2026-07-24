@@ -81,6 +81,9 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
+process.on('uncaughtException', (err) => console.error('Uncaught exception (server stayed alive):', err.message));
+process.on('unhandledRejection', (err) => console.error('Unhandled rejection (server stayed alive):', err));
+
 const readJSON = (f) => { try { return JSON.parse(fs.readFileSync(path.join(DATA_DIR, f), 'utf8')); } catch { return []; } };
 const writeJSON = (f, d) => fs.writeFileSync(path.join(DATA_DIR, f), JSON.stringify(d, null, 2));
 
@@ -134,15 +137,26 @@ function openApp(name) {
       'postman':'postman','virtualbox':'virtualbox','filezilla':'filezilla'
     };
     const cmd = apps[name.toLowerCase()] || name;
+    let settled = false;
     const child = spawn(cmd, [], { detached: true, stdio: 'ignore', env: { ...process.env, DISPLAY: ':0' } });
+    child.on('error', (err) => {
+      if (settled) return;
+      settled = true;
+      resolve(`Could not open "${name}" — no app named "${cmd}" found. If it's a website, try "open <site>" for a known site, or check spelling.`);
+    });
     child.unref();
-    setTimeout(() => resolve(child.killed ? 'Could not open '+name : 'Opened '+name), 500);
+    setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      resolve(child.killed ? 'Could not open '+name : 'Opened '+name);
+    }, 500);
   });
 }
 
 function openSite(url) {
   return new Promise((resolve) => {
     const child = spawn('xdg-open', [url], { detached: true, stdio: 'ignore', env: { ...process.env, DISPLAY: ':0' } });
+    child.on('error', (err) => resolve('Could not open browser: ' + err.message));
     child.unref();
     resolve('Opened');
   });
@@ -230,8 +244,12 @@ async function getAIReply(userId, message) {
 
 function parseCommand(msg) {
   const m = msg.toLowerCase().trim();
-  if (m.startsWith('open ') || m.startsWith('launch ') || m.startsWith('start ')) {
-    const target = m.replace(/^(open|launch|start)\s+/i, '');
+
+  const sites = { youtube:'https://youtube.com', facebook:'https://facebook.com', twitter:'https://twitter.com', instagram:'https://instagram.com', amazon:'https://amazon.com', github:'https://github.com', gmail:'https://mail.google.com', netflix:'https://netflix.com', spotify:'https://open.spotify.com', reddit:'https://reddit.com', linkedin:'https://linkedin.com', wikipedia:'https://wikipedia.org', twitch:'https://twitch.tv', discord:'https://discord.com', tiktok:'https://tiktok.com', whatsapp:'https://web.whatsapp.com' };
+
+  if (m.startsWith('open ') || m.startsWith('launch ') || m.startsWith('start ') || m.startsWith('go to ')) {
+    const target = m.replace(/^(open|launch|start|go to)\s+/i, '').trim();
+    if (sites[target]) return { type: 'site', action: sites[target], message: 'Opening ' + target };
     return { type: 'app', action: target, message: 'Opening ' + target };
   }
   const sys = {
@@ -275,8 +293,6 @@ function parseCommand(msg) {
     return { type: 'site', action: 'https://www.google.com/search?q=' + encodeURIComponent(q), message: 'Searching: ' + q };
   }
 
-  const sites = { youtube:'https://youtube.com', facebook:'https://facebook.com', twitter:'https://twitter.com', instagram:'https://instagram.com', amazon:'https://amazon.com', github:'https://github.com', gmail:'https://mail.google.com', netflix:'https://netflix.com', spotify:'https://open.spotify.com', reddit:'https://reddit.com', linkedin:'https://linkedin.com', wikipedia:'https://wikipedia.org', twitch:'https://twitch.tv', discord:'https://discord.com' };
-  for (const [n, u] of Object.entries(sites)) { if (m.includes(n) && (m.startsWith('open') || m.startsWith('go to'))) return { type: 'site', action: u, message: 'Opening ' + n }; }
 
   if (m.startsWith('play ') || m.startsWith('watch ')) {
     const q = m.replace(/^(play|watch)\s+/i, '');
