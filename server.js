@@ -148,6 +148,36 @@ function openSite(url) {
   });
 }
 
+// ---------- UI input control (requires: sudo apt install xdotool) ----------
+
+function xdotool(args) {
+  return new Promise((resolve) => {
+    exec('xdotool ' + args, { env: { ...process.env, DISPLAY: ':0' } }, (err, stdout, stderr) => {
+      resolve(err ? 'xdotool error: ' + (stderr || err.message) : 'Done');
+    });
+  });
+}
+
+function scroll(direction, amount = 5) {
+  // click 4 = scroll up, click 5 = scroll down, repeated for amount
+  const button = direction === 'up' ? 4 : 5;
+  return xdotool(`click --repeat ${amount} ${button}`);
+}
+
+function clickMouse(button = 1) {
+  return xdotool(`click ${button}`);
+}
+
+function typeText(text) {
+  const escaped = text.replace(/'/g, "'\\''");
+  return xdotool(`type '${escaped}'`);
+}
+
+function pressKey(key) {
+  // e.g. 'Return', 'Tab', 'Escape', 'ctrl+t'
+  return xdotool(`key ${key}`);
+}
+
 function runCmd(cmd) {
   return new Promise((resolve) => {
     exec(cmd, { env: { ...process.env, DISPLAY: ':0' } }, (err, stdout, stderr) => resolve(err ? (stderr || err.message) : (stdout || 'Done')));
@@ -224,6 +254,22 @@ function parseCommand(msg) {
   };
   for (const [t, c] of Object.entries(sys)) { if (m.includes(t)) return { type: 'system', action: c.c, message: c.m }; }
 
+  // UI input control
+  if (/^scroll\s+(down|up)/.test(m)) {
+    const dir = m.includes('up') ? 'up' : 'down';
+    return { type: 'ui', action: { fn: 'scroll', args: [dir] }, message: 'Scrolling ' + dir };
+  }
+  if (/^click$/.test(m) || /^left\s*click$/.test(m)) return { type: 'ui', action: { fn: 'clickMouse', args: [1] }, message: 'Clicked' };
+  if (/^right\s*click$/.test(m)) return { type: 'ui', action: { fn: 'clickMouse', args: [3] }, message: 'Right-clicked' };
+  if (m.startsWith('type ')) {
+    const text = msg.slice(msg.toLowerCase().indexOf('type ') + 5);
+    return { type: 'ui', action: { fn: 'typeText', args: [text] }, message: 'Typed text' };
+  }
+  if (m.startsWith('press ')) {
+    const key = m.replace(/^press\s+/, '').trim();
+    return { type: 'ui', action: { fn: 'pressKey', args: [key] }, message: 'Pressed ' + key };
+  }
+
   if (m.startsWith('search ') || m.startsWith('find ') || m.startsWith('google ')) {
     const q = m.replace(/^(search|find|google)\s+(for\s+)?/i, '');
     return { type: 'site', action: 'https://www.google.com/search?q=' + encodeURIComponent(q), message: 'Searching: ' + q };
@@ -264,6 +310,10 @@ app.post('/api/agent', auth, async (req, res) => {
     if (r.type === 'app') x = await openApp(r.action);
     else if (r.type === 'system') x = await runCmd(r.action);
     else if (r.type === 'site') x = await openSite(r.action);
+    else if (r.type === 'ui') {
+      const fns = { scroll, clickMouse, typeText, pressKey };
+      x = await fns[r.action.fn](...r.action.args);
+    }
     else if (r.type === 'chat_direct') { replyType = 'chat'; }
     else if (r.type === 'chat_ai') { replyMessage = await getAIReply(req.userId, message); replyType = 'chat'; }
 
