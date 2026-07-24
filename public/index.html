@@ -7,21 +7,21 @@
     <style>
         :root{--bg:#0a0a0f;--surface:#13131a;--border:#1e1e2a;--text:#e4e4e7;--text2:#888;--accent:#6366f1;--success:#10b981;--danger:#ef4444}
         *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
+        body{font-family:-apple-system,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
         .hidden{display:none!important}
         .screen{height:100vh;display:flex;align-items:center;justify-content:center}
-        .auth-card{background:var(--surface);padding:40px;border-radius:16px;width:400px;border:1px solid var(--border)}
-        .auth-card .logo{font-size:50px;text-align:center;margin-bottom:15px}
-        .auth-card h2{text-align:center;margin-bottom:5px}
-        .auth-card .sub{text-align:center;color:var(--text2);font-size:13px;margin-bottom:30px}
+        .card{background:var(--surface);padding:40px;border-radius:16px;width:400px;border:1px solid var(--border)}
+        .card .logo{font-size:50px;text-align:center;margin-bottom:15px}
+        .card h2{text-align:center;margin-bottom:5px}
+        .card .sub{text-align:center;color:var(--text2);font-size:13px;margin-bottom:30px}
         .field{margin-bottom:15px}
         .field label{display:block;font-size:11px;color:var(--text2);text-transform:uppercase;margin-bottom:5px;font-weight:600}
         .field input{width:100%;padding:13px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none}
         .field input:focus{border-color:var(--accent)}
         .btn{width:100%;padding:13px;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;background:var(--accent);color:white}
         .btn:hover{opacity:0.9}
-        .auth-link{text-align:center;margin-top:20px;font-size:13px;color:var(--text2)}
-        .auth-link a{color:var(--accent);cursor:pointer}
+        .link{text-align:center;margin-top:20px;font-size:13px;color:var(--text2)}
+        .link a{color:var(--accent);cursor:pointer}
         #appScreen{height:100vh;display:flex;flex-direction:column}
         header{padding:14px 20px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
         .brand{display:flex;align-items:center;gap:10px}
@@ -31,35 +31,37 @@
         header button{padding:8px 16px;background:transparent;border:1px solid var(--border);color:var(--text);border-radius:8px;cursor:pointer}
         main{flex:1;overflow-y:auto;padding:20px}
         .welcome{text-align:center;margin-top:50px}
-        .welcome .w-icon{font-size:60px;margin-bottom:15px}
+        .welcome .icon{font-size:60px;margin-bottom:15px}
         .welcome h2{font-size:22px;margin-bottom:5px}
         .welcome p{color:var(--text2);margin-bottom:20px}
-        .quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:480px;margin:0 auto}
+        .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:480px;margin:0 auto}
         .q-card{padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;cursor:pointer;font-size:14px}
         .q-card:hover{border-color:var(--accent)}
-        .msg{display:flex;margin-bottom:16px;animation:fadeIn 0.3s}
-        @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+        .msg{display:flex;margin-bottom:16px;animation:in 0.3s}
+        @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
         .msg.user{justify-content:flex-end}
         .bubble{max-width:75%;padding:12px 16px;border-radius:16px;font-size:14px;line-height:1.5;white-space:pre-wrap}
         .user .bubble{background:var(--accent);border-bottom-right-radius:4px}
         .agent .bubble{background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:4px}
         .tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;margin-bottom:6px}
-        .tag.command{background:rgba(99,102,241,0.15);color:#a5b4fc}
+        .tag.cmd{background:rgba(99,102,241,0.15);color:#a5b4fc}
         .tag.chat{background:rgba(16,185,129,0.15);color:#6ee7b7}
-        .result-text{display:block;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:12px;color:var(--success)}
+        .res{display:block;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:12px;color:var(--success)}
         footer{padding:14px 20px;background:var(--surface);border-top:1px solid var(--border);display:flex;gap:10px;align-items:center}
         #cmdInput{flex:1;padding:12px 18px;background:var(--bg);border:1.5px solid var(--border);border-radius:25px;color:var(--text);font-size:14px;outline:none}
         #cmdInput:focus{border-color:var(--accent)}
         #cmdInput::placeholder{color:#555}
-        .circle-btn{width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        #cmdInput.listening{border-color:var(--danger)}
+        .c-btn{width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
         #voiceBtn{background:transparent;border:1.5px solid var(--border);color:var(--text2)}
-        #voiceBtn.active{background:var(--danger);border-color:var(--danger);color:white}
+        #voiceBtn.active{background:var(--danger);border-color:var(--danger);color:white;animation:pulse 1.5s infinite}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}
         #sendBtn{background:var(--accent);color:white}
     </style>
 </head>
 <body>
     <div id="loginScreen" class="screen">
-        <div class="auth-card">
+        <div class="card">
             <div class="logo">⚡</div>
             <h2>AI Agent</h2>
             <p class="sub">Your intelligent assistant</p>
@@ -67,14 +69,14 @@
                 <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="you@email.com"></div>
                 <div class="field"><label>Password</label><input type="password" id="loginPassword" placeholder="Your password"></div>
                 <button class="btn" onclick="login()">Sign In</button>
-                <p class="auth-link">No account? <a onclick="showRegister()">Create one</a></p>
+                <p class="link">No account? <a onclick="showRegister()">Create one</a></p>
             </div>
             <div id="registerForm" class="hidden">
                 <div class="field"><label>Name</label><input type="text" id="regName" placeholder="Your name"></div>
                 <div class="field"><label>Email</label><input type="email" id="regEmail" placeholder="you@email.com"></div>
                 <div class="field"><label>Password</label><input type="password" id="regPassword" placeholder="Min 6 characters"></div>
                 <button class="btn" onclick="register()">Create Account</button>
-                <p class="auth-link">Have account? <a onclick="showLogin()">Sign in</a></p>
+                <p class="link">Have account? <a onclick="showLogin()">Sign in</a></p>
             </div>
         </div>
     </div>
@@ -86,32 +88,32 @@
         </header>
         <main id="messages">
             <div class="welcome" id="welcome">
-                <div class="w-icon">⚡</div>
+                <div class="icon">⚡</div>
                 <h2>How can I help you?</h2>
-                <p>Type a command or click 🎤</p>
-                <div class="quick-grid" id="quickGrid"></div>
+                <p>Type a command or click 🎤 to talk (click again to send)</p>
+                <div class="grid" id="quickGrid"></div>
             </div>
         </main>
         <footer>
-            <button class="circle-btn" id="voiceBtn" onclick="toggleVoice()">🎤</button>
+            <button class="c-btn" id="voiceBtn" onclick="toggleVoice()">🎤</button>
             <input type="text" id="cmdInput" placeholder="Type here...">
-            <button class="circle-btn" id="sendBtn" onclick="sendMsg()">➤</button>
+            <button class="c-btn" id="sendBtn" onclick="send()">➤</button>
         </footer>
     </div>
 
     <script>
         var token = localStorage.getItem('token');
         var recognition = null;
-
-        var quickItems = [
-            { icon:'🧮',text:'Open Calculator',cmd:'Open calculator' },
-            { icon:'📁',text:'Open Files',cmd:'Open files' },
-            { icon:'💻',text:'Open Terminal',cmd:'Open terminal' },
-            { icon:'🔊',text:'Volume Up',cmd:'Volume up' },
-            { icon:'📸',text:'Screenshot',cmd:'Take screenshot' },
-            { icon:'🔍',text:'Search cats',cmd:'Search for cats' },
-            { icon:'📺',text:'Open YouTube',cmd:'Open YouTube' },
-            { icon:'💬',text:'Say Hello',cmd:'Hello' }
+        var voiceActive = false;
+        var items = [
+            { icon:'🧮', text:'Open Calculator', cmd:'Open calculator' },
+            { icon:'📁', text:'Open Files', cmd:'Open files' },
+            { icon:'💻', text:'Open Terminal', cmd:'Open terminal' },
+            { icon:'🔊', text:'Volume Up', cmd:'Volume up' },
+            { icon:'📸', text:'Screenshot', cmd:'Screenshot' },
+            { icon:'🔍', text:'Search cats', cmd:'Search for cats' },
+            { icon:'📺', text:'Open YouTube', cmd:'Open YouTube' },
+            { icon:'💬', text:'Say Hello', cmd:'Hello' }
         ];
 
         function showRegister(){document.getElementById('loginForm').classList.add('hidden');document.getElementById('registerForm').classList.remove('hidden')}
@@ -142,10 +144,10 @@
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('appScreen').classList.remove('hidden');
             var g=document.getElementById('quickGrid');g.innerHTML='';
-            quickItems.forEach(function(i){
+            items.forEach(function(i){
                 var c=document.createElement('div');c.className='q-card';
                 c.textContent=i.icon+' '+i.text;
-                c.onclick=function(){document.getElementById('cmdInput').value=i.cmd;sendMsg()};
+                c.onclick=function(){document.getElementById('cmdInput').value=i.cmd;send()};
                 g.appendChild(c);
             });
             setupVoice();document.getElementById('cmdInput').focus();
@@ -153,23 +155,64 @@
 
         function logout(){localStorage.clear();location.reload()}
 
+        // ---------- Voice: continuous, live-typing dictation ----------
         function setupVoice(){
             var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
             if(!SR){document.getElementById('voiceBtn').style.display='none';return}
-            recognition=new SR();recognition.lang='en-US';recognition.interimResults=false;
-            recognition.onstart=function(){document.getElementById('voiceBtn').classList.add('active');document.getElementById('cmdInput').placeholder='Listening...'}
-            recognition.onresult=function(e){var t=e.results[0][0].transcript;document.getElementById('cmdInput').value=t;if(t.trim())sendMsg()}
-            recognition.onerror=function(){document.getElementById('voiceBtn').classList.remove('active')}
-            recognition.onend=function(){document.getElementById('voiceBtn').classList.remove('active');document.getElementById('cmdInput').placeholder='Type here...'}
+            recognition=new SR();
+            recognition.lang='en-US';
+            recognition.continuous=true;      // keep listening past pauses
+            recognition.interimResults=true;  // show words as they're heard, not just at the end
+
+            recognition.onresult=function(e){
+                var transcript='';
+                for(var i=0;i<e.results.length;i++){
+                    transcript+=e.results[i][0].transcript;
+                }
+                document.getElementById('cmdInput').value=transcript;
+            };
+
+            recognition.onerror=function(e){
+                if(e.error==='no-speech')return; // just silence, keep going
+                console.warn('Speech recognition error:',e.error);
+            };
+
+            recognition.onend=function(){
+                // Chrome sometimes ends the session on its own even in continuous mode.
+                // If the user hasn't clicked stop, restart automatically.
+                if(voiceActive){
+                    try{recognition.start()}catch(e){}
+                } else {
+                    document.getElementById('voiceBtn').classList.remove('active');
+                    document.getElementById('cmdInput').classList.remove('listening');
+                    document.getElementById('cmdInput').placeholder='Type here...';
+                }
+            };
         }
 
         function toggleVoice(){
             if(!recognition){alert('Use Chrome for voice');return}
-            if(document.getElementById('voiceBtn').classList.contains('active')){try{recognition.stop()}catch(e){}}
-            else{try{recognition.start()}catch(e){}}
+            var btn=document.getElementById('voiceBtn');
+            var inp=document.getElementById('cmdInput');
+            if(voiceActive){
+                // stop listening and send whatever was captured
+                voiceActive=false;
+                try{recognition.stop()}catch(e){}
+                btn.classList.remove('active');
+                inp.classList.remove('listening');
+                inp.placeholder='Type here...';
+                if(inp.value.trim())send();
+            } else {
+                voiceActive=true;
+                inp.value='';
+                btn.classList.add('active');
+                inp.classList.add('listening');
+                inp.placeholder='Listening... click mic again to send';
+                try{recognition.start()}catch(e){}
+            }
         }
 
-        async function sendMsg(){
+        async function send(){
             var inp=document.getElementById('cmdInput'),cmd=inp.value.trim();
             if(!cmd)return;
             var w=document.getElementById('welcome');if(w)w.remove();
@@ -185,15 +228,15 @@
         function addMsg(text,sender,type,result){
             var div=document.createElement('div');div.className='msg '+sender;
             var h='<div class="bubble">';
-            if(type&&sender==='agent')h+='<span class="tag '+(type==='chat'?'chat':'command')+'">'+(type==='chat'?'CHAT':'ACTION')+'</span>';
+            if(type&&sender==='agent')h+='<span class="tag '+(type==='chat'?'chat':'cmd')+'">'+(type==='chat'?'CHAT':'ACTION')+'</span>';
             h+=text.replace(/\n/g,'<br>');
-            if(result&&result!=='Done'&&result!=='')h+='<span class="result-text">'+result+'</span>';
+            if(result&&result!=='Done'&&result!=='')h+='<span class="res">'+result+'</span>';
             h+='</div>';div.innerHTML=h;
             document.getElementById('messages').appendChild(div);
             div.scrollIntoView({behavior:'smooth'});
         }
 
-        document.addEventListener('keydown',function(e){if(e.key==='Enter'&&document.activeElement===document.getElementById('cmdInput')){e.preventDefault();sendMsg()}});
+        document.addEventListener('keydown',function(e){if(e.key==='Enter'&&document.activeElement===document.getElementById('cmdInput')){e.preventDefault();send()}});
         if(token)showApp();
     </script>
 </body>
